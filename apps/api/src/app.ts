@@ -16,6 +16,8 @@ import {
   adminUniversityRouter,
   publicUniversityRouter,
 } from './routes/university.routes.js';
+import { adminHotelRouter, imageUploadRouter, sellerHotelRouter } from './routes/hotel.routes.js';
+import { uploadsRoot } from './services/image-storage.service.js';
 
 export function createApp() {
   const app = express();
@@ -51,6 +53,10 @@ export function createApp() {
   app.use('/api/role-check', roleTestRouter);
   app.use('/api/universities', publicUniversityRouter);
   app.use('/api/admin/universities', adminUniversityRouter);
+  app.use('/uploads', express.static(uploadsRoot, { fallthrough: false, index: false, maxAge: '1d' }));
+  app.use('/api/seller', sellerHotelRouter);
+  app.use('/api/admin/hotels', adminHotelRouter);
+  app.use('/api/uploads', imageUploadRouter);
   app.use(notFound);
   app.use(errorHandler);
 

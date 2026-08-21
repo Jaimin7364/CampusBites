@@ -27,6 +27,17 @@ describe('apiClient', () => {
     await expect(apiClient('/admin/universities/id', { method: 'DELETE' })).resolves.toBeUndefined();
   });
 
+  it('lets the browser set the multipart form boundary', async () => {
+    setAccessToken('access-token');
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ success: true, data: { url: '/uploads/outlets/image.webp' } }), { status: 201, headers: { 'content-type': 'application/json' } }),
+    );
+    const form = new FormData();
+    form.append('image', new Blob(['image'], { type: 'image/webp' }), 'image.webp');
+    await authenticatedApiClient('/uploads/outlet-image', { method: 'POST', body: form });
+    expect(new Headers(fetchMock.mock.calls[0]?.[1]?.headers).has('content-type')).toBe(false);
+  });
+
   it('throws a typed API error', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response(JSON.stringify({ success: false, error: { code: 'NOPE', message: 'Nope' } }), {

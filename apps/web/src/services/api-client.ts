@@ -1,4 +1,5 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/api';
+export const API_ORIGIN = new URL(API_URL).origin;
 let accessToken: string | null = null;
 let refreshRequest: Promise<string | null> | null = null;
 
@@ -31,7 +32,7 @@ export function getAccessToken() {
 
 async function request<T>(path: string, init: RequestInit = {}, token?: string | null): Promise<T> {
   const headers = new Headers(init.headers);
-  if (init.body && !headers.has('content-type')) headers.set('content-type', 'application/json');
+  if (init.body && !(init.body instanceof FormData) && !headers.has('content-type')) headers.set('content-type', 'application/json');
   if (token) headers.set('authorization', `Bearer ${token}`);
 
   const response = await fetch(`${API_URL}${path}`, {

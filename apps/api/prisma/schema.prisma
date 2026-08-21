@@ -13,6 +13,12 @@ enum UserRole {
   ADMIN
 }
 
+enum HotelStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
   id                String               @id @default(cuid()) @db.VarChar(30)
   role              UserRole
@@ -29,6 +35,8 @@ model User {
   updatedAt         DateTime             @updatedAt
   refreshTokens     RefreshToken[]
   passwordResets    PasswordResetToken[]
+  ownedHotels       Hotel[]              @relation("HotelSeller")
+  approvedHotels    Hotel[]              @relation("HotelApprover")
 
   @@index([role, active])
   @@map("users")
@@ -72,9 +80,42 @@ model University {
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  hotels    Hotel[]
 
   @@unique([name, city])
   @@index([active, name])
   @@index([city])
   @@map("universities")
+}
+
+model Hotel {
+  id             String      @id @default(cuid()) @db.VarChar(30)
+  sellerId       String      @unique @db.VarChar(30)
+  universityId   String      @db.VarChar(30)
+  hotelName      String      @db.VarChar(191)
+  address        String      @db.VarChar(500)
+  phone          String      @db.VarChar(15)
+  whatsappNumber String      @db.VarChar(15)
+  description    String      @db.Text
+  hotelImageUrl  String?     @db.VarChar(500)
+  menuImageUrl   String?     @db.VarChar(500)
+  openTime       String      @db.Char(5)
+  closeTime      String      @db.Char(5)
+  featured       Boolean     @default(false)
+  active         Boolean     @default(true)
+  status         HotelStatus @default(PENDING)
+  rejectReason   String?     @db.VarChar(500)
+  approvedById   String?     @db.VarChar(30)
+  approvedAt     DateTime?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  seller         User        @relation("HotelSeller", fields: [sellerId], references: [id], onDelete: Restrict)
+  university     University  @relation(fields: [universityId], references: [id], onDelete: Restrict)
+  approvedBy     User?       @relation("HotelApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+
+  @@index([universityId, status, active])
+  @@index([status, createdAt])
+  @@index([featured, status, active])
+  @@index([approvedById])
+  @@map("hotels")
 }

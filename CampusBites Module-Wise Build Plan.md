@@ -332,9 +332,9 @@ PATCH /api/admin/hotels/:id/featured
 
 ## Completion Gate
 
-- [ ] The full submission and approval loop works without database intervention.
-- [ ] Ownership and one-outlet rules are enforced server-side.
-- [ ] Status-specific seller and admin UI states are complete.
+- [x] The full submission and approval loop works without database intervention.
+- [x] Ownership and one-outlet rules are enforced server-side.
+- [x] Status-specific seller and admin UI states are complete.
 
 ---
 
@@ -739,7 +739,7 @@ Update this table only after the relevant module completion gate passes.
 | 0. Foundation | Complete | ✅ | ✅ | ✅ | ✅ | API and web foundations verified; no domain migration required yet. |
 | 1. Authentication | Complete | ✅ | ✅ | ✅ | ✅ | Secure auth, role portals, recovery, profiles, and session restoration verified. |
 | 2. Universities | Complete | ✅ | ✅ | ✅ | ✅ | Admin management and persistent active-campus selection verified. |
-| 3. Outlet approval | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
+| 3. Outlet approval | Complete | ✅ | ✅ | ✅ | ✅ | Seller submission/status UI and admin approval queue use the real APIs. |
 | 4. Menu management | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
 | 5. Vendor discovery | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
 | 6. Cart | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
@@ -831,4 +831,18 @@ Automated tests added: 15 Module 2 backend tests and 5 Module 2 frontend tests; 
 Verification commands and results: Prisma migration and schema validation (pass), API and web lint/type-check (pass), 37 API tests and 13 web tests (pass), API and web production builds (pass), npm audit (0 vulnerabilities)
 Important decisions: selected campus ID is stored locally and revalidated against the live active list on load; inactive selections are removed automatically; admin lists are paginated and searchable; referenced universities return a safe conflict and must be deactivated.
 Known limitations deferred to later modules: campus selection scopes outlet discovery when outlet and menu data are introduced in Modules 3–5; browser-level Playwright journeys will be expanded with those business flows.
+```
+
+## Module 3 — Seller Outlet Application and Admin Approval
+
+```text
+Module: 3 — Seller Outlet Application and Admin Approval
+Completion date: 2026-08-21
+Database migrations: 20260821120000_module_3_hotels
+API endpoints completed: validated outlet image upload; seller create/view/update/resubmit; admin list/detail/edit/approve/reject/feature/active/delete
+Frontend routes completed: /seller (outlet onboarding and status workflow), /admin/outlets (review and management queue)
+Automated tests added: 22 Module 3 backend tests and 7 Module 3 frontend tests; 79 total project tests pass
+Verification commands and results: migration and Prisma validation (pass), npm run lint (pass), npm run typecheck (pass), npm test (59 API and 20 web tests pass), npm run build (pass), npm audit (0 vulnerabilities)
+Important decisions: one outlet per seller; local development image storage behind an abstraction; JPEG/PNG/WebP signature and 5 MB validation; atomic approval transitions; rejected outlets require explicit resubmission; seller edits to approved outlets return them to pending; only active approved outlets can be featured.
+Known limitations deferred to later modules: production object storage replaces the local adapter at deployment; public approved-outlet discovery and menus are introduced in Modules 4–5; full Playwright multi-role journeys expand with the orderable marketplace.
 ```
