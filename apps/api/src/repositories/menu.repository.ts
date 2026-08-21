@@ -35,7 +35,7 @@ export function findForCart(ids: string[]) {
     where: { id: { in: ids } },
     select: {
       id: true, hotelId: true, name: true, pricePaise: true, veg: true, bestseller: true, available: true,
-      hotel: { select: { id: true, hotelName: true, status: true, active: true, university: { select: { active: true } } } },
+      hotel: { select: { id: true, hotelName: true, phone: true, sellerId: true, universityId: true, openTime: true, closeTime: true, status: true, active: true, seller: { select: { sellerName: true, businessOwnerName: true } }, university: { select: { active: true } } } },
     },
   });
 }

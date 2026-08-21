@@ -40,4 +40,15 @@ describe('health routes', () => {
     );
     expect(response.headers['access-control-allow-credentials']).toBe('true');
   });
+
+  it('allows the idempotency header required by browser checkout', async () => {
+    const response = await request(app)
+      .options('/api/orders')
+      .set('Origin', 'http://localhost:3000')
+      .set('Access-Control-Request-Method', 'POST')
+      .set('Access-Control-Request-Headers', 'authorization,content-type,idempotency-key')
+      .expect(204);
+
+    expect(String(response.headers['access-control-allow-headers']).toLowerCase()).toContain('idempotency-key');
+  });
 });

@@ -19,6 +19,35 @@ enum HotelStatus {
   REJECTED
 }
 
+enum OrderType {
+  INSTANT
+  PREORDER
+}
+
+enum DeliveryType {
+  PICKUP
+  DELIVERY
+}
+
+enum PaymentMethod {
+  CASH
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+}
+
+enum OrderStatus {
+  PENDING
+  ACCEPTED
+  PREPARING
+  READY
+  COMPLETED
+  REJECTED
+  CANCELLED
+}
+
 model User {
   id                String               @id @default(cuid()) @db.VarChar(30)
   role              UserRole
@@ -37,6 +66,8 @@ model User {
   passwordResets    PasswordResetToken[]
   ownedHotels       Hotel[]              @relation("HotelSeller")
   approvedHotels    Hotel[]              @relation("HotelApprover")
+  orders            Order[]              @relation("OrderUser")
+  sellerOrders      Order[]              @relation("OrderSeller")
 
   @@index([role, active])
   @@map("users")
@@ -113,6 +144,7 @@ model Hotel {
   university     University  @relation(fields: [universityId], references: [id], onDelete: Restrict)
   approvedBy     User?       @relation("HotelApprover", fields: [approvedById], references: [id], onDelete: SetNull)
   menuItems      MenuItem[]
+  orders         Order[]
 
   @@index([universityId, status, active])
   @@index([status, createdAt])
@@ -122,24 +154,83 @@ model Hotel {
 }
 
 model MenuItem {
-  id                     String   @id @default(cuid()) @db.VarChar(30)
-  hotelId                String   @db.VarChar(30)
-  name                   String   @db.VarChar(191)
-  description            String?  @db.VarChar(1000)
+  id                     String      @id @default(cuid()) @db.VarChar(30)
+  hotelId                String      @db.VarChar(30)
+  name                   String      @db.VarChar(191)
+  description            String?     @db.VarChar(1000)
   pricePaise             Int
-  category               String   @db.VarChar(50)
+  category               String      @db.VarChar(50)
   veg                    Boolean
-  bestseller             Boolean  @default(false)
+  bestseller             Boolean     @default(false)
   preparationTimeMinutes Int
-  available              Boolean  @default(true)
-  displayOrder           Int      @default(0)
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
-  hotel                  Hotel    @relation(fields: [hotelId], references: [id], onDelete: Restrict)
+  available              Boolean     @default(true)
+  displayOrder           Int         @default(0)
+  createdAt              DateTime    @default(now())
+  updatedAt              DateTime    @updatedAt
+  hotel                  Hotel       @relation(fields: [hotelId], references: [id], onDelete: Restrict)
+  orderItems             OrderItem[]
 
   @@unique([hotelId, name])
   @@index([hotelId, category, available])
   @@index([hotelId, displayOrder])
   @@index([hotelId, veg, available])
   @@map("menu_items")
+}
+
+model Order {
+  id                  String        @id @default(cuid()) @db.VarChar(30)
+  orderNumber         String        @unique @db.VarChar(40)
+  idempotencyKey      String        @db.VarChar(100)
+  userId              String        @db.VarChar(30)
+  userName            String        @db.VarChar(120)
+  userPhone           String        @db.VarChar(15)
+  sellerId            String        @db.VarChar(30)
+  sellerName          String        @db.VarChar(120)
+  hotelId             String        @db.VarChar(30)
+  hotelName           String        @db.VarChar(191)
+  hotelPhone          String        @db.VarChar(15)
+  universityId        String        @db.VarChar(30)
+  subtotalPaise       Int
+  deliveryChargePaise Int           @default(0)
+  platformFeePaise    Int           @default(0)
+  totalAmountPaise    Int
+  orderType           OrderType
+  deliveryType        DeliveryType
+  deliveryAddress     String?       @db.VarChar(500)
+  scheduledAt         DateTime?
+  paymentMethod       PaymentMethod @default(CASH)
+  paymentStatus       PaymentStatus @default(PENDING)
+  status              OrderStatus   @default(PENDING)
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  user                User          @relation("OrderUser", fields: [userId], references: [id], onDelete: Restrict)
+  seller              User          @relation("OrderSeller", fields: [sellerId], references: [id], onDelete: Restrict)
+  hotel               Hotel         @relation(fields: [hotelId], references: [id], onDelete: Restrict)
+  items               OrderItem[]
+
+  @@unique([userId, idempotencyKey])
+  @@index([userId, createdAt])
+  @@index([sellerId, status, createdAt])
+  @@index([hotelId, createdAt])
+  @@index([universityId, createdAt])
+  @@index([status, scheduledAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id             String   @id @default(cuid()) @db.VarChar(30)
+  orderId        String   @db.VarChar(30)
+  menuItemId     String   @db.VarChar(30)
+  itemName       String   @db.VarChar(191)
+  pricePaise     Int
+  quantity       Int
+  veg            Boolean
+  bestseller     Boolean
+  itemTotalPaise Int
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  menuItem       MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@index([menuItemId])
+  @@map("order_items")
 }

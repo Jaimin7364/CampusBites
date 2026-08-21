@@ -528,9 +528,9 @@ GET  /api/orders/:id
 
 ## Completion Gate
 
-- [ ] All supported checkout combinations behave correctly.
-- [ ] Order totals and snapshots are server-authoritative.
-- [ ] Duplicate submission is prevented and transaction safety is tested.
+- [x] All supported checkout combinations behave correctly.
+- [x] Order totals and snapshots are server-authoritative.
+- [x] Duplicate submission is prevented and transaction safety is tested.
 
 ---
 
@@ -743,7 +743,7 @@ Update this table only after the relevant module completion gate passes.
 | 4. Menu management | Complete | ✅ | ✅ | ✅ | ✅ | Seller CRUD/toggles/reordering and live filtered public menu verified. |
 | 5. Vendor discovery | Complete | ✅ | ✅ | ✅ | ✅ | Campus-scoped discovery, filters, outlet details, contact actions, and live menu verified. |
 | 6. Cart | Complete | ✅ | ✅ | ✅ | ✅ | Persistent single-vendor cart and authoritative preview reconciliation verified. |
-| 7. Checkout/orders | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
+| 7. Checkout/orders | Complete | ✅ | ✅ | ✅ | ✅ | Responsive checkout, final preview, idempotent creation, success flow, and owned order detail verified. |
 | 8. Seller orders | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
 | 9. User tracking | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
 | 10. Admin oversight | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
@@ -887,4 +887,18 @@ Automated tests added: 14 Module 6 backend tests and 6 Module 6 frontend tests; 
 Verification commands and results: npm run lint (pass), npm run typecheck (pass), npm test (103 API and 38 web tests pass), npm run build (pass)
 Important decisions: persisted cart snapshots are schema-validated and cleared if malformed or mixed-vendor; quantities are limited to 20; switching outlets requires explicit confirmation; only item IDs and quantities reach the preview API; current names, prices, availability, fees, and totals always come from the server; all money remains integer paise.
 Known limitations deferred to later modules: the checkout action is intentionally staged for Module 7; cart persistence is device/browser-local; order creation will perform the same authoritative validation again and must not trust preview results.
+```
+
+## Module 7 — Checkout and Order Creation
+
+```text
+Module: 7 — Checkout and Order Creation
+Completion date: 2026-08-21
+Database migrations: 20260821170000_module_7_orders
+API endpoints completed: POST /api/orders/preview, POST /api/orders with idempotency protection, GET /api/orders/:id with user ownership enforcement
+Frontend routes completed: /user/checkout and /user/orders/[orderId]; working checkout navigation from /user/cart
+Automated tests added: 12 Module 7 backend tests and 5 Module 7 frontend tests; 158 total project tests pass
+Verification commands and results: Prisma migration applied; API and web lint/type-check pass; 115 API tests and 43 web tests pass; API and web production builds pass
+Important decisions: checkout performs a final server preview immediately before creation; one stable cryptographic idempotency key is used per mounted checkout attempt; the cart clears only after confirmed creation; local date/time input is converted to UTC ISO; prices, totals, identities, outlet data, payment state, and item snapshots remain server-owned; order detail is privacy-safe.
+Known limitations deferred to later modules: seller order queues and status transitions arrive in Module 8; user order lists, cancellation, live tracking, and Socket.IO arrive in Module 9; cash is the only MVP payment method.
 ```
