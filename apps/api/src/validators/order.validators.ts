@@ -9,3 +9,9 @@ export const createOrderSchema = cartPreviewSchema.extend({ orderType: z.nativeE
   if (value.deliveryType === DeliveryType.PICKUP && value.deliveryAddress) context.addIssue({ code: 'custom', path: ['deliveryAddress'], message: 'Pickup orders cannot have a delivery address' });
 });
 export const orderIdParamsSchema = z.object({ id: z.string().cuid() });
+export const userOrderListQuerySchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  group: z.enum(['active', 'completed', 'cancelled']).optional(),
+  search: z.string().trim().max(120).optional(),
+});

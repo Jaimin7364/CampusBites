@@ -3,13 +3,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const prismaMock = vi.hoisted(() => ({ user: { findUnique: vi.fn() } }));
 const menuRepository = vi.hoisted(() => ({ findForCart: vi.fn() }));
-const orderRepository = vi.hoisted(() => ({ findByIdempotency: vi.fn(), create: vi.fn(), findById: vi.fn() }));
+const orderRepository = vi.hoisted(() => ({ findByIdempotency: vi.fn(), create: vi.fn(), findById: vi.fn(), listForUser: vi.fn(), cancelPending: vi.fn() }));
+const socket = vi.hoisted(() => ({ emitOrderCreated: vi.fn(), emitOrderCancelled: vi.fn() }));
 
 vi.mock('../src/config/prisma.js', () => ({ prisma: prismaMock }));
 vi.mock('../src/repositories/menu.repository.js', () => menuRepository);
 vi.mock('../src/repositories/order.repository.js', () => orderRepository);
+vi.mock('../src/socket/order-socket.js', () => socket);
 
-import { createOrder, getUserOrder } from '../src/services/order.service.js';
+import { cancelUserOrder, createOrder, getUserOrder, listUserOrders } from '../src/services/order.service.js';
 
 const now = new Date('2026-08-21T06:30:00.000Z'); // 12:00 in Asia/Kolkata
 const userId = 'cm1user00000000000000000001';
@@ -69,4 +71,8 @@ describe('order service', () => {
     orderRepository.findById.mockResolvedValue({ id: 'order-1', userId: 'another-user' });
     await expect(getUserOrder(userId, 'order-1')).rejects.toMatchObject({ code: 'ORDER_NOT_FOUND', statusCode: 404 });
   });
+  it('returns only the authenticated user list with pagination', async () => { orderRepository.listForUser.mockResolvedValue({ items: [], total: 21 }); const result = await listUserOrders(userId, { page: 2, limit: 20, group: 'active' }); expect(orderRepository.listForUser).toHaveBeenCalledWith(userId, { page: 2, limit: 20, group: 'active' }); expect(result.pagination).toMatchObject({ totalPages: 2, hasPreviousPage: true }); });
+  it('cancels a pending owned order atomically and emits its event', async () => { const pending = { id: 'order-1', userId, sellerId: 'seller-1', status: 'PENDING' }; orderRepository.findById.mockResolvedValue(pending); orderRepository.cancelPending.mockResolvedValue({ ...pending, status: 'CANCELLED' }); const result = await cancelUserOrder(userId, 'order-1'); expect(result.status).toBe('CANCELLED'); expect(socket.emitOrderCancelled).toHaveBeenCalledWith(result); });
+  it('rejects cancellation after seller acceptance', async () => { orderRepository.findById.mockResolvedValue({ id: 'order-1', userId, status: 'ACCEPTED' }); await expect(cancelUserOrder(userId, 'order-1')).rejects.toMatchObject({ code: 'ORDER_NOT_CANCELLABLE' }); });
+  it('reports a deterministic cancellation race', async () => { orderRepository.findById.mockResolvedValue({ id: 'order-1', userId, status: 'PENDING' }); orderRepository.cancelPending.mockResolvedValue(null); await expect(cancelUserOrder(userId, 'order-1')).rejects.toMatchObject({ code: 'ORDER_STATUS_CHANGED' }); });
 });

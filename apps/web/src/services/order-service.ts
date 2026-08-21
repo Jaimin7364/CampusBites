@@ -10,6 +10,8 @@ export function createOrder(input: CreateOrderInput, idempotencyKey: string) {
 export function getOrder(id: string) {
   return authenticatedApiClient<{ order: Order }>(`/orders/${id}`);
 }
+export function listMyOrders(filters: { page?: number; limit?: number; group?: 'active' | 'completed' | 'cancelled'; search?: string } = {}) { const query = new URLSearchParams(); Object.entries(filters).forEach(([key, value]) => { if (value !== undefined && value !== '') query.set(key, String(value)); }); return authenticatedApiClient<{ orders: Order[]; pagination: { page: number; limit: number; total: number; totalPages: number; hasNextPage: boolean; hasPreviousPage: boolean } }>(`/orders/my?${query}`); }
+export function cancelOrder(id: string) { return authenticatedApiClient<{ order: Order }>(`/orders/${id}/cancel`, { method: 'PATCH' }); }
 
 export function listSellerOrders(filters: SellerOrderFilters = {}) {
   const query = new URLSearchParams(); Object.entries(filters).forEach(([key, value]) => { if (value !== undefined && value !== '') query.set(key, String(value)); });

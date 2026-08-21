@@ -3,7 +3,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SellerOrderWorkspace } from './seller-order-workspace';
 
 const mocks = vi.hoisted(() => ({ listSellerOrders: vi.fn(), getSellerOrder: vi.fn(), getSellerOrderSummary: vi.fn(), changeSellerOrderStatus: vi.fn(), markSellerOrderPaid: vi.fn() }));
+const socket = vi.hoisted(() => ({ on: vi.fn(), disconnect: vi.fn() }));
 vi.mock('@/services/order-service', () => mocks);
+vi.mock('@/services/order-socket', () => ({ createOrderSocket: () => socket }));
 const item = { id: 'order-item-1', menuItemId: 'menu-1', itemName: 'Dosa', pricePaise: 8500, quantity: 2, veg: true, bestseller: false, itemTotalPaise: 17000 };
 const order = { id: 'order-1', orderNumber: 'CB-2026-ABC123', userId: 'user-1', userName: 'Student One', userPhone: '+919999999999', sellerId: 'seller-1', sellerName: 'Campus Foods', hotelId: 'hotel-1', hotelName: 'Campus Cafe', hotelPhone: '+918888888888', universityId: 'university-1', subtotalPaise: 17000, deliveryChargePaise: 0, platformFeePaise: 0, totalAmountPaise: 17000, orderType: 'INSTANT', deliveryType: 'PICKUP', deliveryAddress: null, scheduledAt: null, paymentMethod: 'CASH', paymentStatus: 'PENDING', status: 'PENDING', createdAt: '2026-08-21T06:30:00Z', updatedAt: '2026-08-21T06:30:00Z', items: [item], statusHistory: [{ id: 'history-1', fromStatus: null, toStatus: 'PENDING', changedById: 'user-1', createdAt: '2026-08-21T06:30:00Z' }] };
 const summary = { statusCounts: { PENDING: 1, ACCEPTED: 0, PREPARING: 0, READY: 0, COMPLETED: 0, REJECTED: 0, CANCELLED: 0 }, todayOrders: 1, todaySalesPaise: 0, todayCompletedOrders: 0, businessDate: '2026-08-21' };

@@ -2,6 +2,7 @@ import { OrderStatus, PaymentStatus } from '@prisma/client';
 import { env } from '../config/env.js';
 import { AppError } from '../errors/app-error.js';
 import * as repository from '../repositories/seller-order.repository.js';
+import { emitOrderPaymentChanged, emitOrderStatusChanged } from '../socket/order-socket.js';
 
 const transitions: Partial<Record<OrderStatus, OrderStatus[]>> = { PENDING: [OrderStatus.ACCEPTED, OrderStatus.REJECTED], ACCEPTED: [OrderStatus.PREPARING], PREPARING: [OrderStatus.READY], READY: [OrderStatus.COMPLETED] };
 export async function listSellerOrders(sellerId: string, filters: repository.SellerOrderFilters) { const result = await repository.list(sellerId, filters); return { orders: result.items, pagination: { page: filters.page, limit: filters.limit, total: result.total, totalPages: Math.ceil(result.total / filters.limit), hasNextPage: filters.page * filters.limit < result.total, hasPreviousPage: filters.page > 1 } }; }
@@ -12,13 +13,13 @@ export async function changeStatus(sellerId: string, id: string, target: OrderSt
   if (target === OrderStatus.COMPLETED && order.paymentStatus !== PaymentStatus.PAID) throw new AppError(409, 'PAYMENT_REQUIRED', 'Mark the cash payment as paid before completing the order');
   const updated = await repository.transitionAtomic(sellerId, id, order.status, target, sellerId, now);
   if (!updated) throw new AppError(409, 'ORDER_STATUS_CHANGED', 'The order status changed before this action completed');
-  return updated;
+  emitOrderStatusChanged(updated); return updated;
 }
 export async function markPaymentPaid(sellerId: string, id: string, now = new Date()) {
   const order = await getSellerOrder(sellerId, id);
   if (order.paymentStatus === PaymentStatus.PAID) return order;
   if (order.status !== OrderStatus.READY) throw new AppError(409, 'PAYMENT_NOT_COLLECTABLE', 'Cash payment can be marked paid only when the order is ready');
-  const updated = await repository.markPaidAtomic(sellerId, id, now); if (!updated) throw new AppError(409, 'ORDER_PAYMENT_CHANGED', 'The order payment or status changed before this action completed'); return updated;
+  const updated = await repository.markPaidAtomic(sellerId, id, now); if (!updated) throw new AppError(409, 'ORDER_PAYMENT_CHANGED', 'The order payment or status changed before this action completed'); emitOrderPaymentChanged(updated); return updated;
 }
 function localDayBounds(now: Date) {
   const values = Object.fromEntries(new Intl.DateTimeFormat('en-CA', { timeZone: env.BUSINESS_TIME_ZONE, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(now).filter((part) => part.type !== 'literal').map((part) => [part.type, part.value]));

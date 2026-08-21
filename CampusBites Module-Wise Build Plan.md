@@ -631,9 +631,9 @@ Socket events: order:created, order:status-changed, order:payment-changed
 
 ## Completion Gate
 
-- [ ] Order privacy is verified over REST and Socket.IO.
-- [ ] Cancellation race behavior is deterministic.
-- [ ] Live tracking works, with a functioning fallback.
+- [x] Order privacy is verified over REST and Socket.IO.
+- [x] Cancellation race behavior is deterministic.
+- [x] Live tracking works, with a functioning fallback.
 
 ---
 
@@ -745,7 +745,7 @@ Update this table only after the relevant module completion gate passes.
 | 6. Cart | Complete | ✅ | ✅ | ✅ | ✅ | Persistent single-vendor cart and authoritative preview reconciliation verified. |
 | 7. Checkout/orders | Complete | ✅ | ✅ | ✅ | ✅ | Responsive checkout, final preview, idempotent creation, success flow, and owned order detail verified. |
 | 8. Seller orders | Complete | ✅ | ✅ | ✅ | ✅ | Polling queue, responsive detail/actions, atomic state machine, cash collection, audit history, and daily metrics verified. |
-| 9. User tracking | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
+| 9. User tracking | Complete | ✅ | ✅ | ✅ | ✅ | Private history/detail, pending-only cancellation, authenticated scoped Socket.IO updates, reconnect resync, and polling fallback verified. |
 | 10. Admin oversight | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
 | 11. Production hardening | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
 
@@ -915,4 +915,18 @@ Automated tests added: 24 Module 8 backend tests and 4 Module 8 frontend tests; 
 Verification commands and results: migration applied; API and web lint/type-check pass; 140 API tests and 47 web tests pass; API and web production builds pass
 Important decisions: transitions use atomic compare-and-update transactions; every status change records actor/history and an operational timestamp; seller cancellation is forbidden; cash can be marked paid only at READY and must be paid before completion; repeated paid requests are idempotent; daily sales count only completed paid orders in the configured business timezone; the queue polls every 15 seconds until Module 9 sockets.
 Known limitations deferred to later modules: user cancellation, private order history, Socket.IO status events, reconnection, and polling fallback arrive in Module 9; advanced analytics remain post-MVP.
+```
+
+## Module 9 — User Orders, Cancellation, and Live Tracking
+
+```text
+Module: 9 — User Orders, Cancellation, and Live Tracking
+Completion date: 2026-08-21
+Database migrations: None required; Module 9 uses the order status history and operational timestamps introduced in Module 8.
+API endpoints completed: private grouped/filterable GET /api/orders/my; owned GET /api/orders/:id with status history; atomic pending-only PATCH /api/orders/:id/cancel; authenticated and ownership-scoped Socket.IO order events
+Frontend routes completed: /user/orders and enhanced /user/orders/[orderId]; My Orders student navigation; live updates integrated into user history/detail and seller order workspace
+Automated tests added: 11 Module 9 backend tests and 4 Module 9 frontend tests; 202 total project tests pass
+Verification commands and results: API and web lint/type-check pass; 151 API tests and 51 web tests pass; API and web production builds pass
+Important decisions: REST remains the source of truth; socket events invalidate and refetch authoritative data; reconnect always resynchronizes; user screens retain a 20-second polling fallback and the seller queue retains its 15-second fallback; identity/order rooms enforce ownership; user cancellation is allowed only from PENDING and races resolve through atomic compare-and-update.
+Known limitations deferred to later modules: administrative order oversight and platform aggregates arrive in Module 10; browser-level two-session automation and production deployment/socket infrastructure are finalized during Module 11 hardening.
 ```

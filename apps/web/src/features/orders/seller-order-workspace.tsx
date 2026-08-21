@@ -5,6 +5,7 @@ import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { ApiClientError } from '@/services/api-client';
 import { changeSellerOrderStatus, getSellerOrder, getSellerOrderSummary, listSellerOrders, markSellerOrderPaid } from '@/services/order-service';
+import { createOrderSocket } from '@/services/order-socket';
 import type { Order, OrderStatus, SellerOrderSummary } from '@/types/order';
 import { formatInr } from '@/utils/money';
 import { OrderPriceSummary } from './order-summary';
@@ -24,6 +25,7 @@ export function SellerOrderWorkspace() {
   const load = useCallback(async (silent = false) => { if (!silent) setState('loading'); try { const [queue, metrics] = await Promise.all([listSellerOrders({ page, limit: 20, ...(status ? { status } : {}), ...(search.trim() ? { search: search.trim() } : {}) }), getSellerOrderSummary()]); setOrders(queue.orders); setPages(Math.max(1, queue.pagination.totalPages)); setTotal(queue.pagination.total); setSummary(metrics); setState('ready'); } catch { if (!silent) setState('error'); } }, [page, status, search]);
   useEffect(() => { const timer = setTimeout(() => void load(), 250); return () => clearTimeout(timer); }, [load]);
   useEffect(() => { const timer = window.setInterval(() => void load(true), 15_000); return () => window.clearInterval(timer); }, [load]);
+  useEffect(() => { const socket = createOrderSocket(); const refresh = () => void load(true); socket.on('connect', refresh); socket.on('order:created', refresh); socket.on('order:status-changed', refresh); socket.on('order:payment-changed', refresh); socket.on('order:cancelled', refresh); return () => { socket.disconnect(); }; }, [load]);
   async function open(order: Order) { setDetailLoading(true); setFeedback(''); try { setSelected((await getSellerOrder(order.id)).order); } catch { setFeedback('Order details could not be loaded.'); } finally { setDetailLoading(false); } }
   function sync(updated: Order) { setSelected(updated); setOrders((current) => current.map((order) => order.id === updated.id ? updated : order)); void load(true); }
   async function transition(target: OrderStatus) { if (!selected || busy) return; if ((target === 'REJECTED' || target === 'COMPLETED') && !window.confirm(target === 'REJECTED' ? 'Reject this pending order? This cannot be undone.' : 'Complete this paid order?')) return; setBusy(true); setFeedback(''); try { sync((await changeSellerOrderStatus(selected.id, target)).order); } catch (error) { setFeedback(error instanceof ApiClientError ? error.message : 'Order status could not be changed.'); } finally { setBusy(false); } }
