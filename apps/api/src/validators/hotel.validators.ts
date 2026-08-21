@@ -12,6 +12,15 @@ const imageUrl = z.string().regex(/^\/uploads\/outlets\/[a-f0-9-]+\.(?:jpg|png|w
 
 export const hotelIdParamsSchema = z.object({ id: z.string().cuid() });
 
+export const publicHotelQuerySchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  universityId: z.string().cuid(),
+  search: z.string().trim().max(120).optional(),
+  featured: z.enum(['true', 'false']).transform((value) => value === 'true').optional(),
+  openNow: z.enum(['true', 'false']).transform((value) => value === 'true').optional(),
+});
+
 export const hotelInputSchema = z
   .object({
     universityId: z.string().cuid(),

@@ -26,6 +26,12 @@ export const listAdmin: RequestHandler = async (request, response) => {
   const result = await hotelService.listAdminHotels(request.validatedQuery as Parameters<typeof hotelService.listAdminHotels>[0]);
   sendSuccess(response, result);
 };
+export const listPublic: RequestHandler = async (request, response) => {
+  sendSuccess(response, await hotelService.listPublicHotels(request.validatedQuery as hotelService.PublicHotelFilters));
+};
+export const getPublic: RequestHandler = async (request, response) => {
+  sendSuccess(response, { hotel: await hotelService.getPublicHotel(idFrom(request)) });
+};
 export const getAdmin: RequestHandler = async (request, response) => {
   sendSuccess(response, { hotel: await hotelService.getAdminHotel(idFrom(request)) });
 };

@@ -1,5 +1,5 @@
-import { API_ORIGIN, authenticatedApiClient } from './api-client';
-import type { Hotel, HotelInput, HotelList, HotelStatus } from '@/types/hotel';
+import { API_ORIGIN, apiClient, authenticatedApiClient } from './api-client';
+import type { Hotel, HotelInput, HotelList, HotelStatus, PublicHotel, PublicHotelList } from '@/types/hotel';
 
 export const outletImageUrl = (path: string) => path.startsWith('http') ? path : `${API_ORIGIN}${path}`;
 
@@ -45,3 +45,13 @@ export function setHotelActive(id: string, active: boolean) {
 export function deleteHotel(id: string) {
   return authenticatedApiClient<void>(`/admin/hotels/${id}`, { method: 'DELETE' });
 }
+
+export type PublicHotelFilters = { universityId: string; page: number; search?: string; featured?: boolean; openNow?: boolean };
+export function listPublicHotels(filters: PublicHotelFilters) {
+  const query = new URLSearchParams({ universityId: filters.universityId, page: String(filters.page), limit: '12' });
+  if (filters.search?.trim()) query.set('search', filters.search.trim());
+  if (filters.featured !== undefined) query.set('featured', String(filters.featured));
+  if (filters.openNow !== undefined) query.set('openNow', String(filters.openNow));
+  return apiClient<PublicHotelList>(`/hotels?${query.toString()}`);
+}
+export function getPublicHotel(id: string) { return apiClient<{ hotel: PublicHotel }>(`/hotels/${id}`); }

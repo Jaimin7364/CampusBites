@@ -11,8 +11,13 @@ import {
   hotelActiveSchema,
   hotelIdParamsSchema,
   hotelInputSchema,
+  publicHotelQuerySchema,
   rejectHotelSchema,
 } from '../validators/hotel.validators.js';
+
+export const publicHotelRouter = Router();
+publicHotelRouter.get('/', validateQuery(publicHotelQuerySchema), controller.listPublic);
+publicHotelRouter.get('/:id', validateParams(hotelIdParamsSchema), controller.getPublic);
 
 export const sellerHotelRouter = Router();
 sellerHotelRouter.use(authenticate, authorize(UserRole.SELLER));

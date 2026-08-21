@@ -1,0 +1,20 @@
+import { UserRole } from '@prisma/client';
+import request from 'supertest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+const service = vi.hoisted(() => ({ listPublicMenu: vi.fn(), listSellerMenu: vi.fn(), createMenuItem: vi.fn(), updateMenuItem: vi.fn(), setAvailability: vi.fn(), setBestseller: vi.fn(), reorderMenu: vi.fn(), deleteMenuItem: vi.fn() }));
+vi.mock('../src/services/menu.service.js', () => service);
+vi.mock('../src/middleware/authenticate.js', () => ({ authenticate: (request: { header(name: string): string | undefined; auth?: unknown }, _response: unknown, next: () => void) => { const role = request.header('x-test-role'); request.auth = { userId: `${role ?? 'user'}-1`, role: role === 'seller' ? UserRole.SELLER : role === 'admin' ? UserRole.ADMIN : UserRole.USER }; next(); } }));
+import { createApp } from '../src/app.js';
+const hotelId = 'cm1hotel0000000000000000001';
+const id = 'cm1menu00000000000000000001';
+const input = { name: 'Masala Dosa', description: 'Crispy dosa with chutney', pricePaise: 8500, category: 'South Indian', veg: true, preparationTimeMinutes: 15 };
+describe('menu routes', () => {
+  beforeEach(() => vi.clearAllMocks());
+  it('lists an approved outlet menu publicly with parsed filters', async () => { service.listPublicMenu.mockResolvedValue({ menuItems: [], pagination: {} }); const response = await request(createApp()).get(`/api/hotels/${hotelId}/menu?veg=true&available=false&sort=priceAsc`); expect(response.status).toBe(200); expect(service.listPublicMenu).toHaveBeenCalledWith(hotelId, expect.objectContaining({ veg: true, available: false, sort: 'priceAsc', page: 1, limit: 50 })); });
+  it('forbids users from seller menu routes', async () => { const response = await request(createApp()).get('/api/seller/menu').set('x-test-role', 'user'); expect(response.status).toBe(403); });
+  it('creates a menu item for a seller', async () => { service.createMenuItem.mockResolvedValue({ id, ...input }); const response = await request(createApp()).post('/api/seller/menu').set('x-test-role', 'seller').send(input); expect(response.status).toBe(201); expect(service.createMenuItem).toHaveBeenCalledWith('seller-1', expect.objectContaining({ pricePaise: 8500, available: true })); });
+  it('rejects floating-point prices before the service', async () => { const response = await request(createApp()).post('/api/seller/menu').set('x-test-role', 'seller').send({ ...input, pricePaise: 85.5 }); expect(response.status).toBe(422); expect(service.createMenuItem).not.toHaveBeenCalled(); });
+  it('toggles availability', async () => { service.setAvailability.mockResolvedValue({ id, available: false }); const response = await request(createApp()).patch(`/api/seller/menu/${id}/availability`).set('x-test-role', 'seller').send({ available: false }); expect(response.status).toBe(200); expect(service.setAvailability).toHaveBeenCalledWith('seller-1', id, false); });
+  it('reorders owned menu items', async () => { service.reorderMenu.mockResolvedValue([]); const items = [{ id, displayOrder: 3 }]; const response = await request(createApp()).patch('/api/seller/menu/reorder').set('x-test-role', 'seller').send({ items }); expect(response.status).toBe(200); expect(service.reorderMenu).toHaveBeenCalledWith('seller-1', items); });
+  it('returns no body after deletion', async () => { service.deleteMenuItem.mockResolvedValue(undefined); const response = await request(createApp()).delete(`/api/seller/menu/${id}`).set('x-test-role', 'seller'); expect(response.status).toBe(204); });
+});

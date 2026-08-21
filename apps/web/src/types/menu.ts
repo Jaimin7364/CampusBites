@@ -1,0 +1,6 @@
+export const menuCategories = ['Breakfast', 'Snacks', 'Lunch', 'Dinner', 'Beverages', 'Fast Food', 'Chinese', 'South Indian', 'Desserts', 'Others'] as const;
+export type MenuCategory = (typeof menuCategories)[number];
+export type MenuItem = { id: string; hotelId: string; name: string; description: string | null; pricePaise: number; category: MenuCategory; veg: boolean; bestseller: boolean; preparationTimeMinutes: number; available: boolean; displayOrder: number; createdAt: string; updatedAt: string };
+export type MenuItemInput = Omit<MenuItem, 'id' | 'hotelId' | 'createdAt' | 'updatedAt' | 'displayOrder'> & { displayOrder?: number };
+export type PublicMenuHotel = { id: string; universityId: string; hotelName: string; address: string; phone: string; whatsappNumber: string; description: string; hotelImageUrl: string | null; menuImageUrl: string | null; openTime: string; closeTime: string; featured: boolean; active: boolean; status: 'APPROVED'; university: { id: string; name: string; city: string; state: string | null; active: boolean } };
+export type MenuList<T> = { hotel: T; menuItems: MenuItem[]; pagination: { page: number; limit: number; total: number; totalPages: number; hasNextPage: boolean; hasPreviousPage: boolean } };

@@ -6,6 +6,7 @@ const service = vi.hoisted(() => ({
   getSellerHotel: vi.fn(), createSellerHotel: vi.fn(), updateSellerHotel: vi.fn(), resubmitSellerHotel: vi.fn(),
   listAdminHotels: vi.fn(), getAdminHotel: vi.fn(), approveHotel: vi.fn(), rejectHotel: vi.fn(),
   setFeatured: vi.fn(), updateAdminHotel: vi.fn(), setHotelActive: vi.fn(), deleteHotel: vi.fn(),
+  listPublicHotels: vi.fn(), getPublicHotel: vi.fn(),
 }));
 const imageStorage = vi.hoisted(() => ({ saveOutletImage: vi.fn() }));
 vi.mock('../src/services/hotel.service.js', () => service);
@@ -29,6 +30,32 @@ const hotel = { id, sellerId: 'seller-1', ...input, status: 'PENDING', active: t
 
 describe('hotel routes', () => {
   beforeEach(() => vi.clearAllMocks());
+
+  it('allows the web origin to display uploaded images', async () => {
+    const response = await request(createApp()).get('/uploads/missing.png');
+    expect(response.status).toBe(404);
+    expect(response.headers['cross-origin-resource-policy']).toBe('cross-origin');
+  });
+
+  it('lists public outlets with validated discovery filters', async () => {
+    service.listPublicHotels.mockResolvedValue({ hotels: [], pagination: {} });
+    const response = await request(createApp()).get(`/api/hotels?universityId=${input.universityId}&search=Cafe&featured=true&openNow=true`);
+    expect(response.status).toBe(200);
+    expect(service.listPublicHotels).toHaveBeenCalledWith(expect.objectContaining({ universityId: input.universityId, search: 'Cafe', featured: true, openNow: true, page: 1 }));
+  });
+
+  it('returns a public outlet detail without authentication', async () => {
+    service.getPublicHotel.mockResolvedValue({ ...hotel, status: 'APPROVED', isOpen: true });
+    const response = await request(createApp()).get(`/api/hotels/${id}`);
+    expect(response.status).toBe(200);
+    expect(service.getPublicHotel).toHaveBeenCalledWith(id);
+  });
+
+  it('rejects discovery without a university ID', async () => {
+    const response = await request(createApp()).get('/api/hotels');
+    expect(response.status).toBe(422);
+    expect(service.listPublicHotels).not.toHaveBeenCalled();
+  });
 
   it('returns the current seller outlet', async () => {
     service.getSellerHotel.mockResolvedValue(hotel);

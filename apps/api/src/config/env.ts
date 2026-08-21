@@ -18,6 +18,7 @@ const envSchema = z.object({
     .min(1)
     .default('mysql://campusbites:campusbites@localhost:3306/campusbites'),
   WEB_ORIGIN: z.url().default('http://localhost:3000'),
+  BUSINESS_TIME_ZONE: z.string().min(1).default('Asia/Kolkata'),
   JWT_ACCESS_SECRET: z
     .string()
     .min(32)

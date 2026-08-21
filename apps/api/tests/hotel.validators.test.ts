@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { adminHotelQuerySchema, hotelInputSchema, rejectHotelSchema } from '../src/validators/hotel.validators.js';
+import { adminHotelQuerySchema, hotelInputSchema, publicHotelQuerySchema, rejectHotelSchema } from '../src/validators/hotel.validators.js';
 
 const valid = {
   universityId: 'cm1university000000000000001',
@@ -14,4 +14,6 @@ describe('hotel validators', () => {
   it('rejects invalid operating time', () => expect(hotelInputSchema.safeParse({ ...valid, closeTime: '25:00' }).success).toBe(false));
   it('requires a useful rejection reason', () => expect(rejectHotelSchema.safeParse({ reason: 'no' }).success).toBe(false));
   it('parses admin filters and pagination', () => expect(adminHotelQuerySchema.parse({ page: '2', status: 'PENDING', featured: 'true' })).toMatchObject({ page: 2, limit: 20, status: 'PENDING', featured: true }));
+  it('requires a university and parses public discovery filters', () => expect(publicHotelQuerySchema.parse({ universityId: valid.universityId, featured: 'true', openNow: 'false' })).toMatchObject({ universityId: valid.universityId, featured: true, openNow: false, page: 1, limit: 20 }));
+  it('rejects public discovery without a valid university', () => expect(publicHotelQuerySchema.safeParse({ universityId: 'wrong' }).success).toBe(false));
 });

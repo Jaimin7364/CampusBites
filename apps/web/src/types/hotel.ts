@@ -45,3 +45,24 @@ export type HotelList = {
   hotels: Hotel[];
   pagination: { page: number; limit: number; total: number; totalPages: number; hasNextPage: boolean; hasPreviousPage: boolean };
 };
+
+export type PublicHotel = {
+  id: string;
+  universityId: string;
+  hotelName: string;
+  address: string;
+  phone: string;
+  whatsappNumber: string;
+  description: string;
+  hotelImageUrl: string | null;
+  menuImageUrl: string | null;
+  openTime: string;
+  closeTime: string;
+  featured: boolean;
+  active: true;
+  status: 'APPROVED';
+  isOpen: boolean;
+  university: Pick<University, 'id' | 'name' | 'city' | 'state' | 'active'>;
+};
+
+export type PublicHotelList = { hotels: PublicHotel[]; pagination: HotelList['pagination'] };

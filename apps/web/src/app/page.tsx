@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { ApiStatus } from '@/components/health/api-status';
-import { CampusSelector } from '@/features/universities/campus-selector';
+import { VendorDiscovery } from '@/features/hotels/vendor-discovery';
 
 const portals = [
   { href: '/register', label: 'Join as a student', copy: 'Create your account and get ready to explore campus food.' },
@@ -21,7 +21,7 @@ export default function Home() {
         <p className="mt-6 max-w-2xl text-lg leading-8 text-stone-600">Discover trusted campus food outlets, order instantly, or schedule pickup before your next break.</p>
         <div className="mt-8 flex flex-wrap gap-3"><Link href="/register" className="rounded-xl bg-brand-orange-500 px-5 py-3 font-semibold text-white shadow-sm hover:bg-brand-orange-600">Create student account</Link><Link href="/login" className="rounded-xl border border-stone-200 bg-white px-5 py-3 font-semibold text-stone-800 hover:bg-stone-50">Sign in</Link></div>
       </section>
-      <div className="mb-10"><CampusSelector /></div>
+      <div className="mb-10"><VendorDiscovery /></div>
       <section aria-label="Platform portals" className="grid gap-4 md:grid-cols-3">
         {portals.map((portal) => (
           <Link key={portal.href} href={portal.href} className="group rounded-3xl border border-stone-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-orange-200 hover:shadow-lg">

@@ -28,15 +28,18 @@ describe('CampusSelector', () => {
   });
 
   it('persists a selected active campus and allows changing it', async () => {
-    render(<CampusSelector />);
+    const onSelected = vi.fn();
+    render(<CampusSelector onSelected={onSelected} />);
     fireEvent.change(await screen.findByLabelText('Campus'), { target: { value: campus.id } });
     fireEvent.click(screen.getByRole('button', { name: 'Use this campus' }));
 
     expect(screen.getByRole('heading', { name: campus.name })).toBeInTheDocument();
     expect(window.localStorage.getItem(SELECTED_CAMPUS_KEY)).toBe(campus.id);
+    expect(onSelected).toHaveBeenLastCalledWith(campus);
 
     fireEvent.click(screen.getByRole('button', { name: 'Change campus' }));
     expect(window.localStorage.getItem(SELECTED_CAMPUS_KEY)).toBeNull();
+    expect(onSelected).toHaveBeenLastCalledWith(null);
     expect(screen.getByRole('heading', { name: 'Choose your campus' })).toBeInTheDocument();
   });
 

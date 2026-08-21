@@ -383,9 +383,9 @@ PATCH  /api/seller/menu/:id/bestseller
 
 ## Completion Gate
 
-- [ ] Approved seller menu management works end-to-end.
-- [ ] User menu data is live and accurately filtered.
-- [ ] Money is stored and displayed without floating-point errors.
+- [x] Approved seller menu management works end-to-end.
+- [x] User menu data is live and accurately filtered.
+- [x] Money is stored and displayed without floating-point errors.
 
 ---
 
@@ -428,9 +428,9 @@ GET /api/hotels/:hotelId/menu
 
 ## Completion Gate
 
-- [ ] Vendor visibility strictly follows university and approval rules.
-- [ ] Discovery and details work responsively using real data.
-- [ ] Open/closed logic has deterministic tests.
+- [x] Vendor visibility strictly follows university and approval rules.
+- [x] Discovery and details work responsively using real data.
+- [x] Open/closed logic has deterministic tests.
 
 ---
 
@@ -740,8 +740,8 @@ Update this table only after the relevant module completion gate passes.
 | 1. Authentication | Complete | ✅ | ✅ | ✅ | ✅ | Secure auth, role portals, recovery, profiles, and session restoration verified. |
 | 2. Universities | Complete | ✅ | ✅ | ✅ | ✅ | Admin management and persistent active-campus selection verified. |
 | 3. Outlet approval | Complete | ✅ | ✅ | ✅ | ✅ | Seller submission/status UI and admin approval queue use the real APIs. |
-| 4. Menu management | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
-| 5. Vendor discovery | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
+| 4. Menu management | Complete | ✅ | ✅ | ✅ | ✅ | Seller CRUD/toggles/reordering and live filtered public menu verified. |
+| 5. Vendor discovery | Complete | ✅ | ✅ | ✅ | ✅ | Campus-scoped discovery, filters, outlet details, contact actions, and live menu verified. |
 | 6. Cart | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
 | 7. Checkout/orders | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
 | 8. Seller orders | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
@@ -845,4 +845,32 @@ Automated tests added: 22 Module 3 backend tests and 7 Module 3 frontend tests; 
 Verification commands and results: migration and Prisma validation (pass), npm run lint (pass), npm run typecheck (pass), npm test (59 API and 20 web tests pass), npm run build (pass), npm audit (0 vulnerabilities)
 Important decisions: one outlet per seller; local development image storage behind an abstraction; JPEG/PNG/WebP signature and 5 MB validation; atomic approval transitions; rejected outlets require explicit resubmission; seller edits to approved outlets return them to pending; only active approved outlets can be featured.
 Known limitations deferred to later modules: production object storage replaces the local adapter at deployment; public approved-outlet discovery and menus are introduced in Modules 4–5; full Playwright multi-role journeys expand with the orderable marketplace.
+```
+
+## Module 4 — Menu Management
+
+```text
+Module: 4 — Menu Management
+Completion date: 2026-08-21
+Database migrations: 20260821150000_module_4_menu_items
+API endpoints completed: public approved-outlet menu listing; seller menu list/create/update/delete; availability and bestseller toggles; atomic display-order updates
+Frontend routes completed: /seller/menu (seller menu management), /hotels/[hotelId]/menu (public live menu)
+Automated tests added: 20 Module 4 backend tests and 7 Module 4 frontend tests; 106 total project tests pass
+Verification commands and results: migration applied and Prisma schema validated; npm run lint (pass), npm run typecheck (pass), npm test (79 API and 27 web tests pass), npm run build (pass)
+Important decisions: prices use integer paise from database through API and exact string conversion at the form boundary; menu mutation requires the seller's active approved outlet; public results expose approved active outlets only; unavailable dishes remain visible with ordering disabled; filtered views disable manual reordering to avoid ambiguous order changes.
+Known limitations deferred to later modules: cart actions remain explicitly disabled until Module 6; Module 5 will add vendor discovery and link its outlet cards/details to the public menu route; browser-level multi-role E2E coverage expands with the full marketplace journey.
+```
+
+## Module 5 — User Vendor Discovery and Vendor Details
+
+```text
+Module: 5 — User Vendor Discovery and Vendor Details
+Completion date: 2026-08-21
+Database migrations: None required; Module 5 uses university, hotel, and menu data introduced earlier.
+API endpoints completed: GET /api/hotels with required university scope, search, featured, open-now and pagination filters; GET /api/hotels/:id privacy-safe public detail; existing GET /api/hotels/:hotelId/menu integrated into details
+Frontend routes completed: / (campus-scoped responsive vendor discovery), /hotels/[hotelId] (outlet details, contact actions, and embedded live menu), /hotels/[hotelId]/menu (focused menu view)
+Automated tests added: 9 Module 5 backend tests and 5 Module 5 frontend tests; 120 total project tests pass
+Verification commands and results: npm run lint (pass), npm run typecheck (pass), npm test (88 API and 32 web tests pass), npm run build (pass)
+Important decisions: discovery requires a validated active campus ID; public database projections exclude seller/admin identity; only approved active outlets at active universities are visible; server-computed business hours use configurable Asia/Kolkata timezone by default and support overnight schedules; call and WhatsApp URLs are allowlist-normalized; missing outlet images use a branded fallback.
+Known limitations deferred to later modules: cart controls remain disabled until Module 6; map/distance discovery is post-MVP; full browser-level ordering journeys depend on cart and orders in Modules 6–9.
 ```

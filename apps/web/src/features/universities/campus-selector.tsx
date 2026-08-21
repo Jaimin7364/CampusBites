@@ -8,7 +8,7 @@ import type { University } from '@/types/university';
 
 export const SELECTED_CAMPUS_KEY = 'campusbites.selectedUniversityId';
 
-export function CampusSelector({ compact = false }: { compact?: boolean }) {
+export function CampusSelector({ compact = false, onSelected }: { compact?: boolean; onSelected?: (campus: University | null) => void }) {
   const [universities, setUniversities] = useState<University[]>([]);
   const [selected, setSelected] = useState<University | null>(null);
   const [choice, setChoice] = useState('');
@@ -23,6 +23,7 @@ export function CampusSelector({ compact = false }: { compact?: boolean }) {
       const savedId = window.localStorage.getItem(SELECTED_CAMPUS_KEY);
       const savedCampus = result.universities.find((item) => item.id === savedId) ?? null;
       setSelected(savedCampus);
+      onSelected?.(savedCampus);
       setChoice(savedCampus?.id ?? '');
       if (savedId && !savedCampus) {
         window.localStorage.removeItem(SELECTED_CAMPUS_KEY);
@@ -32,7 +33,7 @@ export function CampusSelector({ compact = false }: { compact?: boolean }) {
     } catch {
       setStatus('error');
     }
-  }, []);
+  }, [onSelected]);
 
   useEffect(() => {
     void load();
@@ -43,6 +44,7 @@ export function CampusSelector({ compact = false }: { compact?: boolean }) {
     if (!campus) return;
     window.localStorage.setItem(SELECTED_CAMPUS_KEY, campus.id);
     setSelected(campus);
+    onSelected?.(campus);
     setNotice('');
   }
 
@@ -51,6 +53,7 @@ export function CampusSelector({ compact = false }: { compact?: boolean }) {
     setSelected(null);
     setChoice('');
     setNotice('');
+    onSelected?.(null);
   }
 
   if (status === 'loading') {

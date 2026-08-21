@@ -3,6 +3,7 @@ import { prisma } from '../config/prisma.js';
 import { AppError } from '../errors/app-error.js';
 import * as repository from '../repositories/hotel.repository.js';
 import { normalizeIndianPhone } from '../utils/phone.js';
+import { env } from '../config/env.js';
 
 export type HotelInput = {
   universityId: string;
@@ -16,6 +17,22 @@ export type HotelInput = {
   openTime: string;
   closeTime: string;
 };
+
+export type PublicHotelFilters = { page: number; limit: number; universityId: string; search?: string; featured?: boolean; openNow?: boolean };
+
+function minutes(time: string) { const [hour, minute] = time.split(':').map(Number); return hour! * 60 + minute!; }
+
+export function localMinutesAt(date: Date, timeZone = env.BUSINESS_TIME_ZONE) {
+  const parts = new Intl.DateTimeFormat('en-GB', { timeZone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(date);
+  const hour = Number(parts.find((part) => part.type === 'hour')?.value);
+  const minute = Number(parts.find((part) => part.type === 'minute')?.value);
+  return hour * 60 + minute;
+}
+
+export function isHotelOpenAt(openTime: string, closeTime: string, date: Date, timeZone = env.BUSINESS_TIME_ZONE) {
+  const now = localMinutesAt(date, timeZone); const open = minutes(openTime); const close = minutes(closeTime);
+  return open < close ? now >= open && now < close : now >= open || now < close;
+}
 
 function clean(value: string) {
   return value.trim().replace(/\s+/g, ' ');
@@ -96,6 +113,20 @@ export async function resubmitSellerHotel(sellerId: string, id: string) {
 export async function listAdminHotels(filters: repository.HotelFilters) {
   const result = await repository.list(filters);
   return { hotels: result.items, pagination: { page: filters.page, limit: filters.limit, total: result.total, totalPages: Math.ceil(result.total / filters.limit), hasNextPage: filters.page * filters.limit < result.total, hasPreviousPage: filters.page > 1 } };
+}
+
+export async function listPublicHotels(filters: PublicHotelFilters, now = new Date()) {
+  const candidates = await repository.listPublicCandidates(filters);
+  const withStatus = candidates.map((hotel) => ({ ...hotel, isOpen: isHotelOpenAt(hotel.openTime, hotel.closeTime, now) }));
+  const matching = filters.openNow === undefined ? withStatus : withStatus.filter((hotel) => hotel.isOpen === filters.openNow);
+  const start = (filters.page - 1) * filters.limit;
+  return { hotels: matching.slice(start, start + filters.limit), pagination: { page: filters.page, limit: filters.limit, total: matching.length, totalPages: Math.ceil(matching.length / filters.limit), hasNextPage: filters.page * filters.limit < matching.length, hasPreviousPage: filters.page > 1 } };
+}
+
+export async function getPublicHotel(id: string, now = new Date()) {
+  const hotel = await repository.findPublicById(id);
+  if (!hotel || hotel.status !== HotelStatus.APPROVED || !hotel.active || !hotel.university.active) throw new AppError(404, 'HOTEL_NOT_FOUND', 'Approved food outlet was not found');
+  return { ...hotel, isOpen: isHotelOpenAt(hotel.openTime, hotel.closeTime, now) };
 }
 
 export async function getAdminHotel(id: string) {
