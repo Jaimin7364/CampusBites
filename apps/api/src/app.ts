@@ -12,6 +12,10 @@ import { requestId } from './middleware/request-id.js';
 import { healthRouter } from './routes/health.routes.js';
 import { authRouter } from './routes/auth.routes.js';
 import { roleTestRouter } from './routes/role-test.routes.js';
+import {
+  adminUniversityRouter,
+  publicUniversityRouter,
+} from './routes/university.routes.js';
 
 export function createApp() {
   const app = express();
@@ -45,6 +49,8 @@ export function createApp() {
   app.use('/api/health', healthRouter);
   app.use('/api/auth', authRouter);
   app.use('/api/role-check', roleTestRouter);
+  app.use('/api/universities', publicUniversityRouter);
+  app.use('/api/admin/universities', adminUniversityRouter);
   app.use(notFound);
   app.use(errorHandler);
 

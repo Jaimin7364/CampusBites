@@ -273,9 +273,9 @@ DELETE /api/admin/universities/:id
 
 ## Completion Gate
 
-- [ ] University CRUD and status management work end-to-end.
-- [ ] Campus selection persists and handles deactivation correctly.
-- [ ] Referential-integrity behavior is tested.
+- [x] University CRUD and status management work end-to-end.
+- [x] Campus selection persists and handles deactivation correctly.
+- [x] Referential-integrity behavior is tested.
 
 ---
 
@@ -738,7 +738,7 @@ Update this table only after the relevant module completion gate passes.
 |---|---|---|---|---|---|---|
 | 0. Foundation | Complete | ✅ | ✅ | ✅ | ✅ | API and web foundations verified; no domain migration required yet. |
 | 1. Authentication | Complete | ✅ | ✅ | ✅ | ✅ | Secure auth, role portals, recovery, profiles, and session restoration verified. |
-| 2. Universities | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
+| 2. Universities | Complete | ✅ | ✅ | ✅ | ✅ | Admin management and persistent active-campus selection verified. |
 | 3. Outlet approval | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
 | 4. Menu management | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
 | 5. Vendor discovery | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
@@ -817,4 +817,18 @@ Automated tests added: 15 Module 1 backend tests and 5 Module 1 frontend tests; 
 Verification commands and results: npm run lint (pass), npm run typecheck (pass), npm test (28 pass), npm run build (pass), npm audit (0 vulnerabilities)
 Important decisions: access tokens remain in memory; refresh JWTs use rotating HTTP-only cookies and are stored as hashes; reload restoration uses the refresh endpoint; client guards redirect by role; public admin registration is disabled.
 Known limitations deferred to later modules: production email provider and managed profile-image uploads require deployment/storage integration; portal business features begin in Module 2.
+```
+
+## Module 2 — University Management and Campus Selection
+
+```text
+Module: 2 — University Management and Campus Selection
+Completion date: 2026-08-21
+Database migrations: 20260821100000_module_2_universities
+API endpoints completed: public active university listing; admin list/detail/create/update/status/delete university endpoints
+Frontend routes completed: / (public campus selector), /user (authenticated campus selector), /admin (university management)
+Automated tests added: 15 Module 2 backend tests and 5 Module 2 frontend tests; 50 total project tests pass
+Verification commands and results: Prisma migration and schema validation (pass), API and web lint/type-check (pass), 37 API tests and 13 web tests (pass), API and web production builds (pass), npm audit (0 vulnerabilities)
+Important decisions: selected campus ID is stored locally and revalidated against the live active list on load; inactive selections are removed automatically; admin lists are paginated and searchable; referenced universities return a safe conflict and must be deactivated.
+Known limitations deferred to later modules: campus selection scopes outlet discovery when outlet and menu data are introduced in Modules 3–5; browser-level Playwright journeys will be expanded with those business flows.
 ```

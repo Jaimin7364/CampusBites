@@ -39,6 +39,7 @@ async function request<T>(path: string, init: RequestInit = {}, token?: string |
     headers,
     credentials: 'include',
   });
+  if (response.status === 204) return undefined as T;
   const body = (await response.json()) as ApiSuccess<T> | ApiFailure;
 
   if (!response.ok || !body.success) {

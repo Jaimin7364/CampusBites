@@ -63,3 +63,18 @@ model PasswordResetToken {
   @@index([userId, expiresAt])
   @@map("password_reset_tokens")
 }
+
+model University {
+  id        String   @id @default(cuid()) @db.VarChar(30)
+  name      String   @db.VarChar(191)
+  city      String   @db.VarChar(120)
+  state     String?  @db.VarChar(120)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name, city])
+  @@index([active, name])
+  @@index([city])
+  @@map("universities")
+}

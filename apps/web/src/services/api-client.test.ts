@@ -22,6 +22,11 @@ describe('apiClient', () => {
     await expect(apiClient('/health')).resolves.toEqual({ status: 'up' });
   });
 
+  it('accepts a successful response with no content', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(null, { status: 204 }));
+    await expect(apiClient('/admin/universities/id', { method: 'DELETE' })).resolves.toBeUndefined();
+  });
+
   it('throws a typed API error', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response(JSON.stringify({ success: false, error: { code: 'NOPE', message: 'Nope' } }), {
