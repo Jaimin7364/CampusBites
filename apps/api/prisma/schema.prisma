@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  SELLER
+  ADMIN
+}
+
+model User {
+  id                String               @id @default(cuid()) @db.VarChar(30)
+  role              UserRole
+  fullName          String?              @db.VarChar(120)
+  sellerName        String?              @db.VarChar(120)
+  businessOwnerName String?              @db.VarChar(120)
+  email             String               @unique @db.VarChar(191)
+  phone             String               @unique @db.VarChar(15)
+  passwordHash      String               @db.VarChar(255)
+  profilePhotoUrl   String?              @db.VarChar(500)
+  active            Boolean              @default(true)
+  passwordChangedAt DateTime?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  refreshTokens     RefreshToken[]
+  passwordResets    PasswordResetToken[]
+
+  @@index([role, active])
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid()) @db.VarChar(36)
+  userId    String    @db.VarChar(30)
+  tokenHash String    @unique @db.Char(64)
+  familyId  String    @db.VarChar(36)
+  expiresAt DateTime
+  revokedAt DateTime?
+  userAgent String?   @db.VarChar(500)
+  ipAddress String?   @db.VarChar(45)
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@index([familyId])
+  @@map("refresh_tokens")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid()) @db.VarChar(30)
+  userId    String    @db.VarChar(30)
+  tokenHash String    @unique @db.Char(64)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@map("password_reset_tokens")
+}

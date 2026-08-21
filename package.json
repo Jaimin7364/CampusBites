@@ -1,0 +1,28 @@
+{
+  "name": "campusbites",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web -c green,orange \"npm run dev -w @campusbites/api\" \"npm run dev -w @campusbites/web\"",
+    "dev:api": "npm run dev -w @campusbites/api",
+    "dev:web": "npm run dev -w @campusbites/web",
+    "build": "npm run build -ws --if-present",
+    "lint": "npm run lint -ws --if-present",
+    "typecheck": "npm run typecheck -ws --if-present",
+    "test": "npm run test -ws --if-present",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "concurrently": "9.2.4",
+    "prettier": "3.6.2"
+  },
+  "engines": {
+    "node": ">=20.9.0",
+    "npm": ">=10.0.0"
+  }
+}
