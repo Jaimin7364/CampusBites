@@ -681,9 +681,9 @@ GET /api/admin/dashboard
 
 ## Completion Gate
 
-- [ ] Admin can manage and inspect all MVP resources from one portal.
-- [ ] Dashboard statistics have tested definitions.
-- [ ] Lists are paginated and do not expose secrets or excessive personal data.
+- [x] Admin can manage and inspect all MVP resources from one portal.
+- [x] Dashboard statistics have tested definitions.
+- [x] Lists are paginated and do not expose secrets or excessive personal data.
 
 ---
 
@@ -746,7 +746,7 @@ Update this table only after the relevant module completion gate passes.
 | 7. Checkout/orders | Complete | ✅ | ✅ | ✅ | ✅ | Responsive checkout, final preview, idempotent creation, success flow, and owned order detail verified. |
 | 8. Seller orders | Complete | ✅ | ✅ | ✅ | ✅ | Polling queue, responsive detail/actions, atomic state machine, cash collection, audit history, and daily metrics verified. |
 | 9. User tracking | Complete | ✅ | ✅ | ✅ | ✅ | Private history/detail, pending-only cancellation, authenticated scoped Socket.IO updates, reconnect resync, and polling fallback verified. |
-| 10. Admin oversight | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
+| 10. Admin oversight | Complete | ✅ | ✅ | ✅ | ✅ | Unified admin overview, resource navigation, bounded account/order directories, linked detail, filters, and tested completed-paid value definition verified. |
 | 11. Production hardening | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
 
 Allowed status values: `Not started`, `In progress`, `Blocked`, and `Complete`.
@@ -929,4 +929,18 @@ Automated tests added: 11 Module 9 backend tests and 4 Module 9 frontend tests; 
 Verification commands and results: API and web lint/type-check pass; 151 API tests and 51 web tests pass; API and web production builds pass
 Important decisions: REST remains the source of truth; socket events invalidate and refetch authoritative data; reconnect always resynchronizes; user screens retain a 20-second polling fallback and the seller queue retains its 15-second fallback; identity/order rooms enforce ownership; user cancellation is allowed only from PENDING and races resolve through atomic compare-and-update.
 Known limitations deferred to later modules: administrative order oversight and platform aggregates arrive in Module 10; browser-level two-session automation and production deployment/socket infrastructure are finalized during Module 11 hardening.
+```
+
+## Module 10 — Admin Users, Sellers, Orders, and Dashboard
+
+```text
+Module: 10 — Admin Users, Sellers, Orders, and Dashboard
+Completion date: 2026-08-21
+Database migrations: None required; Module 10 aggregates and inspects existing account, campus, outlet, menu, and order data.
+API endpoints completed: admin-only dashboard; paginated/searchable user and seller lists/details; paginated all-order list with university, outlet, status, payment, date, and text filters; complete linked order detail
+Frontend routes completed: /admin overview; /admin/universities; /admin/outlets; /admin/users; /admin/sellers; /admin/orders; /admin/orders/[orderId]; unified responsive admin navigation
+Automated tests added: 16 Module 10 backend tests and 6 Module 10 frontend tests; 224 total project tests pass
+Verification commands and results: Prisma schema validation passes; API and web lint/type-check pass; 167 API tests and 57 web tests pass; API and web production builds pass
+Important decisions: Module 10 oversight is read-only for accounts and orders; existing dedicated campus and outlet management remains available; all lists are database-paginated with a 100-record maximum; explicit projections exclude password/session/reset data; total order value is the integer-paise sum of COMPLETED and PAID orders only; charts remain deferred.
+Known limitations deferred to later modules: final multi-role browser journeys, accessibility/security audits, deployment operations, backup/restore, and production hardening are handled in Module 11; advanced charts remain post-MVP.
 ```

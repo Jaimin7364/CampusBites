@@ -1,0 +1,3 @@
+'use client';
+import { useParams } from 'next/navigation'; import { AuthGuard } from '@/features/auth/auth-guard'; import { DashboardShell } from '@/components/layout/dashboard-shell'; import { AdminOrderDetail } from '@/features/admin/admin-order-detail';
+export default function AdminOrderDetailPage() { const { orderId } = useParams<{ orderId: string }>(); return <AuthGuard role="admin"><DashboardShell role="admin" title="Order inspection" description="Review the complete order snapshot, participants, payment, and status history."><AdminOrderDetail orderId={orderId} /></DashboardShell></AuthGuard>; }

@@ -21,6 +21,7 @@ import { uploadsRoot } from './services/image-storage.service.js';
 import { publicMenuRouter, sellerMenuRouter } from './routes/menu.routes.js';
 import { cartRouter } from './routes/cart.routes.js';
 import { sellerOrderRouter } from './routes/seller-order.routes.js';
+import { adminRouter } from './routes/admin.routes.js';
 
 export function createApp() {
   const app = express();
@@ -65,6 +66,7 @@ export function createApp() {
   app.use('/api/seller/menu', sellerMenuRouter);
   app.use('/api/orders', cartRouter);
   app.use('/api/seller/orders', sellerOrderRouter);
+  app.use('/api/admin', adminRouter);
   app.use(notFound);
   app.use(errorHandler);
 
