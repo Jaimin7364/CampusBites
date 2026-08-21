@@ -472,9 +472,9 @@ POST /api/orders/preview
 
 ## Completion Gate
 
-- [ ] Single-vendor enforcement works in state and UI.
-- [ ] Cart totals are deterministic and server-revalidated.
-- [ ] No browser-supplied price is treated as authoritative.
+- [x] Single-vendor enforcement works in state and UI.
+- [x] Cart totals are deterministic and server-revalidated.
+- [x] No browser-supplied price is treated as authoritative.
 
 ---
 
@@ -742,7 +742,7 @@ Update this table only after the relevant module completion gate passes.
 | 3. Outlet approval | Complete | ✅ | ✅ | ✅ | ✅ | Seller submission/status UI and admin approval queue use the real APIs. |
 | 4. Menu management | Complete | ✅ | ✅ | ✅ | ✅ | Seller CRUD/toggles/reordering and live filtered public menu verified. |
 | 5. Vendor discovery | Complete | ✅ | ✅ | ✅ | ✅ | Campus-scoped discovery, filters, outlet details, contact actions, and live menu verified. |
-| 6. Cart | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
+| 6. Cart | Complete | ✅ | ✅ | ✅ | ✅ | Persistent single-vendor cart and authoritative preview reconciliation verified. |
 | 7. Checkout/orders | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
 | 8. Seller orders | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
 | 9. User tracking | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
@@ -873,4 +873,18 @@ Automated tests added: 9 Module 5 backend tests and 5 Module 5 frontend tests; 1
 Verification commands and results: npm run lint (pass), npm run typecheck (pass), npm test (88 API and 32 web tests pass), npm run build (pass)
 Important decisions: discovery requires a validated active campus ID; public database projections exclude seller/admin identity; only approved active outlets at active universities are visible; server-computed business hours use configurable Asia/Kolkata timezone by default and support overnight schedules; call and WhatsApp URLs are allowlist-normalized; missing outlet images use a branded fallback.
 Known limitations deferred to later modules: cart controls remain disabled until Module 6; map/distance discovery is post-MVP; full browser-level ordering journeys depend on cart and orders in Modules 6–9.
+```
+
+## Module 6 — Single-Vendor Cart
+
+```text
+Module: 6 — Single-Vendor Cart
+Completion date: 2026-08-21
+Database migrations: None required; cart state is browser-local and server preview reads current menu data.
+API endpoints completed: POST /api/orders/preview for authenticated students with authoritative menu data, single-outlet enforcement, availability reconciliation, and integer-paise totals
+Frontend routes completed: /user/cart; add and quantity controls integrated into /hotels/[hotelId] and /hotels/[hotelId]/menu; cart count integrated into student navigation
+Automated tests added: 14 Module 6 backend tests and 6 Module 6 frontend tests; 141 total project tests pass
+Verification commands and results: npm run lint (pass), npm run typecheck (pass), npm test (103 API and 38 web tests pass), npm run build (pass)
+Important decisions: persisted cart snapshots are schema-validated and cleared if malformed or mixed-vendor; quantities are limited to 20; switching outlets requires explicit confirmation; only item IDs and quantities reach the preview API; current names, prices, availability, fees, and totals always come from the server; all money remains integer paise.
+Known limitations deferred to later modules: the checkout action is intentionally staged for Module 7; cart persistence is device/browser-local; order creation will perform the same authoritative validation again and must not trust preview results.
 ```

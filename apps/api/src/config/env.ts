@@ -19,6 +19,9 @@ const envSchema = z.object({
     .default('mysql://campusbites:campusbites@localhost:3306/campusbites'),
   WEB_ORIGIN: z.url().default('http://localhost:3000'),
   BUSINESS_TIME_ZONE: z.string().min(1).default('Asia/Kolkata'),
+  CART_MAX_ITEM_QUANTITY: z.coerce.number().int().min(1).max(100).default(20),
+  DELIVERY_CHARGE_PAISE: z.coerce.number().int().min(0).default(0),
+  PLATFORM_FEE_PAISE: z.coerce.number().int().min(0).default(0),
   JWT_ACCESS_SECRET: z
     .string()
     .min(32)

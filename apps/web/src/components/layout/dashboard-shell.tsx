@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/features/auth/auth-context';
 import type { UserRole } from '@/types/auth';
+import { CartNavLink } from '@/features/cart/cart-nav-link';
 
 const labels = { user: 'Student', seller: 'Seller', admin: 'Administrator' } as const;
 
@@ -26,6 +27,7 @@ export function DashboardShell({ role, title, description, children }: { role: U
           <nav aria-label="Account navigation" className="flex items-center gap-2">
             {role === 'admin' ? <><Link href="/admin" className="hidden rounded-xl px-3 py-2 text-sm font-semibold text-stone-600 hover:bg-stone-100 hover:text-stone-950 sm:block">Universities</Link><Link href="/admin/outlets" className="rounded-xl px-3 py-2 text-sm font-semibold text-stone-600 hover:bg-stone-100 hover:text-stone-950">Outlets</Link></> : null}
             {role === 'seller' ? <><Link href="/seller" className="hidden rounded-xl px-3 py-2 text-sm font-semibold text-stone-600 hover:bg-stone-100 hover:text-stone-950 sm:block">Outlet</Link><Link href="/seller/menu" className="rounded-xl px-3 py-2 text-sm font-semibold text-stone-600 hover:bg-stone-100 hover:text-stone-950">Menu</Link></> : null}
+            {role === 'user' ? <CartNavLink /> : null}
             <Link href={`/${role}/profile`} className="rounded-xl px-3 py-2 text-sm font-semibold text-stone-600 hover:bg-stone-100 hover:text-stone-950">Profile</Link>
             <Button variant="ghost" onClick={signOut} className="min-h-10 px-3 py-2">Logout</Button>
           </nav>

@@ -1,0 +1,3 @@
+export type CartItem = { menuItemId: string; hotelId: string; hotelName: string; itemName: string; pricePaise: number; quantity: number; veg: boolean; bestseller: boolean };
+export type CartPreviewItem = Omit<CartItem, 'hotelName'> & { available: boolean; subtotalPaise: number };
+export type CartPreview = { hotel: { id: string; hotelName: string }; items: CartPreviewItem[]; orderable: boolean; issues: { code: string; message: string; menuItemIds: string[] }[]; totals: { totalQuantity: number; itemsTotalPaise: number; deliveryChargePaise: number; platformFeePaise: number; grandTotalPaise: number } };

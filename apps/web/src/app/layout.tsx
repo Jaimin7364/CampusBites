@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/features/auth/auth-context';
+import { CartProvider } from '@/features/cart/cart-context';
 
 export const metadata: Metadata = {
   title: { default: 'CampusBites', template: '%s · CampusBites' },
@@ -11,7 +12,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body className="font-sans antialiased">
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider><CartProvider>{children}</CartProvider></AuthProvider>
       </body>
     </html>
   );

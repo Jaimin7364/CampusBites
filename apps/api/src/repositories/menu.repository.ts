@@ -30,3 +30,12 @@ export function remove(id: string) { return prisma.menuItem.delete({ where: { id
 export async function nextDisplayOrder(hotelId: string) { const result = await prisma.menuItem.aggregate({ where: { hotelId }, _max: { displayOrder: true } }); return (result._max.displayOrder ?? -1) + 1; }
 export function findOwnedIds(hotelId: string, ids: string[]) { return prisma.menuItem.findMany({ where: { hotelId, id: { in: ids } }, select: { id: true } }); }
 export function reorder(items: { id: string; displayOrder: number }[]) { return prisma.$transaction(items.map((item) => prisma.menuItem.update({ where: { id: item.id }, data: { displayOrder: item.displayOrder } }))); }
+export function findForCart(ids: string[]) {
+  return prisma.menuItem.findMany({
+    where: { id: { in: ids } },
+    select: {
+      id: true, hotelId: true, name: true, pricePaise: true, veg: true, bestseller: true, available: true,
+      hotel: { select: { id: true, hotelName: true, status: true, active: true, university: { select: { active: true } } } },
+    },
+  });
+}
