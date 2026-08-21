@@ -583,9 +583,9 @@ PATCH /api/seller/orders/:id/payment-status
 
 ## Completion Gate
 
-- [ ] Seller ownership is enforced on list, detail, and mutation routes.
-- [ ] Status transitions are atomic and fully tested.
-- [ ] Seller can operate an order from pending through completion on mobile and desktop.
+- [x] Seller ownership is enforced on list, detail, and mutation routes.
+- [x] Status transitions are atomic and fully tested.
+- [x] Seller can operate an order from pending through completion on mobile and desktop.
 
 ---
 
@@ -744,7 +744,7 @@ Update this table only after the relevant module completion gate passes.
 | 5. Vendor discovery | Complete | ✅ | ✅ | ✅ | ✅ | Campus-scoped discovery, filters, outlet details, contact actions, and live menu verified. |
 | 6. Cart | Complete | ✅ | ✅ | ✅ | ✅ | Persistent single-vendor cart and authoritative preview reconciliation verified. |
 | 7. Checkout/orders | Complete | ✅ | ✅ | ✅ | ✅ | Responsive checkout, final preview, idempotent creation, success flow, and owned order detail verified. |
-| 8. Seller orders | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
+| 8. Seller orders | Complete | ✅ | ✅ | ✅ | ✅ | Polling queue, responsive detail/actions, atomic state machine, cash collection, audit history, and daily metrics verified. |
 | 9. User tracking | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
 | 10. Admin oversight | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
 | 11. Production hardening | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
@@ -901,4 +901,18 @@ Automated tests added: 12 Module 7 backend tests and 5 Module 7 frontend tests; 
 Verification commands and results: Prisma migration applied; API and web lint/type-check pass; 115 API tests and 43 web tests pass; API and web production builds pass
 Important decisions: checkout performs a final server preview immediately before creation; one stable cryptographic idempotency key is used per mounted checkout attempt; the cart clears only after confirmed creation; local date/time input is converted to UTC ISO; prices, totals, identities, outlet data, payment state, and item snapshots remain server-owned; order detail is privacy-safe.
 Known limitations deferred to later modules: seller order queues and status transitions arrive in Module 8; user order lists, cancellation, live tracking, and Socket.IO arrive in Module 9; cash is the only MVP payment method.
+```
+
+## Module 8 — Seller Order Management
+
+```text
+Module: 8 — Seller Order Management
+Completion date: 2026-08-21
+Database migrations: 20260821190000_module_8_seller_orders
+API endpoints completed: seller-owned paginated/filterable order list and detail; atomic status updates; ready-only cash collection; daily status-count and paid-sales summary
+Frontend routes completed: /seller/orders; Orders navigation and live summary integrated into /seller
+Automated tests added: 24 Module 8 backend tests and 4 Module 8 frontend tests; 187 total project tests pass
+Verification commands and results: migration applied; API and web lint/type-check pass; 140 API tests and 47 web tests pass; API and web production builds pass
+Important decisions: transitions use atomic compare-and-update transactions; every status change records actor/history and an operational timestamp; seller cancellation is forbidden; cash can be marked paid only at READY and must be paid before completion; repeated paid requests are idempotent; daily sales count only completed paid orders in the configured business timezone; the queue polls every 15 seconds until Module 9 sockets.
+Known limitations deferred to later modules: user cancellation, private order history, Socket.IO status events, reconnection, and polling fallback arrive in Module 9; advanced analytics remain post-MVP.
 ```
