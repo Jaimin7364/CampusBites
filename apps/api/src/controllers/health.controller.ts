@@ -28,3 +28,12 @@ export const getDatabaseHealth: RequestHandler = async (_request, response) => {
     );
   }
 };
+
+export const getReadiness: RequestHandler = async (_request, response) => {
+  try {
+    await checkDatabase(prisma);
+    sendSuccess(response, { service: 'campusbites-api', status: 'ready', checks: { database: 'up' }, timestamp: new Date().toISOString() });
+  } catch {
+    throw new AppError(503, 'SERVICE_NOT_READY', 'The service is not ready to accept traffic');
+  }
+};

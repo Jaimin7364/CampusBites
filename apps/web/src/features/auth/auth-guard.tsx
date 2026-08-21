@@ -12,7 +12,7 @@ export function AuthGuard({ role, children }: { role: UserRole; children: React.
 
   useEffect(() => {
     if (status === 'unauthenticated') router.replace(`/login?next=/${role}`);
-    if (status === 'authenticated' && user?.role !== role) router.replace(roleHome(user!.role));
+    if (status === 'authenticated' && user?.role !== role) router.replace(`/unauthorized?required=${role}`);
   }, [role, router, status, user]);
 
   if (status === 'loading' || (status === 'authenticated' && user?.role !== role)) {

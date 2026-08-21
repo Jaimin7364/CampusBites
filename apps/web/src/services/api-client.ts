@@ -1,5 +1,6 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/api';
 export const API_ORIGIN = new URL(API_URL).origin;
+export const SESSION_EXPIRED_EVENT = 'campusbites:session-expired';
 let accessToken: string | null = null;
 let refreshRequest: Promise<string | null> | null = null;
 
@@ -35,11 +36,12 @@ async function request<T>(path: string, init: RequestInit = {}, token?: string |
   if (init.body && !(init.body instanceof FormData) && !headers.has('content-type')) headers.set('content-type', 'application/json');
   if (token) headers.set('authorization', `Bearer ${token}`);
 
-  const response = await fetch(`${API_URL}${path}`, {
-    ...init,
-    headers,
-    credentials: 'include',
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_URL}${path}`, { ...init, headers, credentials: 'include' });
+  } catch {
+    throw new ApiClientError(0, 'NETWORK_ERROR', 'CampusBites could not reach the server. Check your connection and try again.');
+  }
   if (response.status === 204) return undefined as T;
   const body = (await response.json()) as ApiSuccess<T> | ApiFailure;
 
@@ -85,7 +87,10 @@ export async function authenticatedApiClient<T>(path: string, init: RequestInit 
   } catch (error) {
     if (!(error instanceof ApiClientError) || error.status !== 401) throw error;
     const token = await refreshAccessToken();
-    if (!token) throw error;
+    if (!token) {
+      if (typeof window !== 'undefined') window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
+      throw error;
+    }
     return request<T>(path, init, token);
   }
 }

@@ -723,10 +723,10 @@ Validate the complete platform as one production-ready MVP and close cross-modul
 ## Completion Gate
 
 - [ ] All three final MVP journeys pass end-to-end.
-- [ ] No critical or high-severity security issues remain.
-- [ ] All lint, type, unit, integration, end-to-end, and production-build checks pass.
-- [ ] Deployment, environment, migration, seed, backup, and rollback documentation is complete.
-- [ ] Known non-MVP work is documented separately and does not block core journeys.
+- [x] No critical or high-severity security issues remain.
+- [x] All lint, type, unit, integration, end-to-end, and production-build checks pass.
+- [x] Deployment, environment, migration, seed, backup, and rollback documentation is complete.
+- [x] Known non-MVP work is documented separately and does not block core journeys.
 
 ---
 
@@ -747,7 +747,7 @@ Update this table only after the relevant module completion gate passes.
 | 8. Seller orders | Complete | ✅ | ✅ | ✅ | ✅ | Polling queue, responsive detail/actions, atomic state machine, cash collection, audit history, and daily metrics verified. |
 | 9. User tracking | Complete | ✅ | ✅ | ✅ | ✅ | Private history/detail, pending-only cancellation, authenticated scoped Socket.IO updates, reconnect resync, and polling fallback verified. |
 | 10. Admin oversight | Complete | ✅ | ✅ | ✅ | ✅ | Unified admin overview, resource navigation, bounded account/order directories, linked detail, filters, and tested completed-paid value definition verified. |
-| 11. Production hardening | Not started | ⬜ | ⬜ | ⬜ | ⬜ | |
+| 11. Production hardening | In progress | ✅ | ✅ | ✅ | ✅ | Production hardening and automated browser coverage complete; seeded multi-role staging journey sign-off remains. |
 
 Allowed status values: `Not started`, `In progress`, `Blocked`, and `Complete`.
 
@@ -943,4 +943,18 @@ Automated tests added: 16 Module 10 backend tests and 6 Module 10 frontend tests
 Verification commands and results: Prisma schema validation passes; API and web lint/type-check pass; 167 API tests and 57 web tests pass; API and web production builds pass
 Important decisions: Module 10 oversight is read-only for accounts and orders; existing dedicated campus and outlet management remains available; all lists are database-paginated with a 100-record maximum; explicit projections exclude password/session/reset data; total order value is the integer-paise sum of COMPLETED and PAID orders only; charts remain deferred.
 Known limitations deferred to later modules: final multi-role browser journeys, accessibility/security audits, deployment operations, backup/restore, and production hardening are handled in Module 11; advanced charts remain post-MVP.
+```
+
+## Module 11 — Production Hardening and MVP Acceptance (Acceptance Pending)
+
+```text
+Module: 11 — Production Hardening and MVP Acceptance
+Completion date: Pending seeded staging journey sign-off
+Database migrations: 20260821220000_module_11_production_indexes
+API endpoints completed: GET /api/health/ready; all existing routes audited for authorization, ownership, token freshness, rate limits, validation, and privacy-safe errors
+Frontend routes completed: /unauthorized plus application-wide error boundaries, offline/session-expired feedback, accessibility navigation, metadata, icons, manifest, and security headers
+Automated tests added: 6 Module 11 API tests, 4 Module 11 web unit tests, and a 15-case Chromium/Firefox/mobile Playwright hardening suite; 249 automated checks pass in total
+Verification commands and results: migration applied and Prisma schema current; npm run lint (pass), npm run typecheck (pass), npm test (173 API and 61 web tests pass), npm run test:e2e -w @campusbites/web (15 pass), npm run build (pass), npm audit --omit=dev (0 vulnerabilities)
+Important decisions: stale access tokens are rejected after password changes in REST and Socket.IO; production requires distinct JWT secrets and secure cookies; readiness verifies database access; cleanup and shutdown behavior are configurable; REST remains authoritative after session or network recovery; automated browser coverage spans Chromium, Firefox, and mobile Chromium.
+Known limitations deferred before final Module 11 sign-off: execute and record the three seeded stateful user, seller, and admin journeys in docs/MVP_ACCEPTANCE_CHECKLIST.md against the staging-like stack. Advanced analytics, online payment, maps, and native applications remain post-MVP.
 ```

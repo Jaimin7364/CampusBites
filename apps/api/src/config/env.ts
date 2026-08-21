@@ -18,6 +18,8 @@ const envSchema = z.object({
     .min(1)
     .default('mysql://campusbites:campusbites@localhost:3306/campusbites'),
   WEB_ORIGIN: z.url().default('http://localhost:3000'),
+  TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(10).default(1),
+  API_BODY_LIMIT: z.string().regex(/^\d+(kb|mb)$/i).default('100kb'),
   BUSINESS_TIME_ZONE: z.string().min(1).default('Asia/Kolkata'),
   CART_MAX_ITEM_QUANTITY: z.coerce.number().int().min(1).max(100).default(20),
   DELIVERY_CHARGE_PAISE: z.coerce.number().int().min(0).default(0),
@@ -38,6 +40,9 @@ const envSchema = z.object({
     .positive()
     .default(30),
   PASSWORD_RESET_TTL_MINUTES: z.coerce.number().int().positive().default(30),
+  TOKEN_CLEANUP_INTERVAL_MINUTES: z.coerce.number().int().min(5).default(60),
+  TOKEN_RETENTION_DAYS: z.coerce.number().int().min(1).default(30),
+  SHUTDOWN_TIMEOUT_SECONDS: z.coerce.number().int().min(1).max(60).default(10),
   BCRYPT_ROUNDS: z.coerce.number().int().min(10).max(15).default(12),
   COOKIE_SECURE: z
     .enum(['true', 'false'])
@@ -69,4 +74,8 @@ if (
     env.JWT_REFRESH_SECRET.startsWith('development-'))
 ) {
   throw new Error('Production requires unique JWT access and refresh secrets');
+}
+
+if (env.NODE_ENV === 'production' && !env.COOKIE_SECURE) {
+  throw new Error('Production requires COOKIE_SECURE=true');
 }

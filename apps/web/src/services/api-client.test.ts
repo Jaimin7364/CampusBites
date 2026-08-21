@@ -3,6 +3,7 @@ import {
   ApiClientError,
   apiClient,
   authenticatedApiClient,
+  SESSION_EXPIRED_EVENT,
   setAccessToken,
 } from './api-client';
 
@@ -87,5 +88,20 @@ describe('apiClient', () => {
     expect(new Headers(fetchMock.mock.calls[2]?.[1]?.headers).get('authorization')).toBe(
       'Bearer fresh-token',
     );
+  });
+
+  it('returns a useful network error when fetch cannot connect', async () => {
+    vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('Failed to fetch'));
+    await expect(apiClient('/health')).rejects.toMatchObject({ status: 0, code: 'NETWORK_ERROR' });
+  });
+
+  it('announces session expiry when refresh cannot recover an authenticated request', async () => {
+    setAccessToken('expired-token');
+    vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response(JSON.stringify({ success: false, error: { code: 'INVALID_TOKEN', message: 'Expired' } }), { status: 401 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ success: false, error: { code: 'INVALID_SESSION', message: 'Expired' } }), { status: 401 }));
+    const listener = vi.fn(); window.addEventListener(SESSION_EXPIRED_EVENT, listener);
+    await expect(authenticatedApiClient('/auth/me')).rejects.toMatchObject({ status: 401 });
+    expect(listener).toHaveBeenCalledOnce(); window.removeEventListener(SESSION_EXPIRED_EVENT, listener);
   });
 });

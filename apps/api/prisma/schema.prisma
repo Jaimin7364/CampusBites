@@ -71,6 +71,7 @@ model User {
   orderStatusChanges OrderStatusHistory[]
 
   @@index([role, active])
+  @@index([role, createdAt])
   @@map("users")
 }
 
@@ -88,6 +89,7 @@ model RefreshToken {
 
   @@index([userId, expiresAt])
   @@index([familyId])
+  @@index([expiresAt, revokedAt])
   @@map("refresh_tokens")
 }
 
@@ -101,6 +103,7 @@ model PasswordResetToken {
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, expiresAt])
+  @@index([expiresAt, usedAt])
   @@map("password_reset_tokens")
 }
 
@@ -223,6 +226,7 @@ model Order {
   @@index([hotelId, createdAt])
   @@index([universityId, createdAt])
   @@index([status, scheduledAt])
+  @@index([status, paymentStatus, createdAt])
   @@map("orders")
 }
 

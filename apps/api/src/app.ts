@@ -27,7 +27,7 @@ export function createApp() {
   const app = express();
 
   app.disable('x-powered-by');
-  app.set('trust proxy', 1);
+  app.set('trust proxy', env.TRUST_PROXY_HOPS);
   app.use(requestId);
   app.use(pinoHttp({ logger }));
   app.use(helmet());
@@ -39,8 +39,8 @@ export function createApp() {
       allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id', 'Idempotency-Key'],
     }),
   );
-  app.use(express.json({ limit: '100kb' }));
-  app.use(express.urlencoded({ extended: false, limit: '100kb' }));
+  app.use(express.json({ limit: env.API_BODY_LIMIT }));
+  app.use(express.urlencoded({ extended: false, limit: env.API_BODY_LIMIT }));
   app.use(cookieParser());
   app.use(
     '/api',
@@ -54,7 +54,7 @@ export function createApp() {
 
   app.use('/api/health', healthRouter);
   app.use('/api/auth', authRouter);
-  app.use('/api/role-check', roleTestRouter);
+  if (env.NODE_ENV !== 'production') app.use('/api/role-check', roleTestRouter);
   app.use('/api/universities', publicUniversityRouter);
   app.use('/api/admin/universities', adminUniversityRouter);
   app.use('/uploads', (_request, response, next) => { response.setHeader('Cross-Origin-Resource-Policy', 'cross-origin'); next(); }, express.static(uploadsRoot, { fallthrough: true, index: false, maxAge: '1d' }));

@@ -1,0 +1,3 @@
+'use client';
+import Link from 'next/link'; import { useAuth } from '@/features/auth/auth-context'; import { roleHome } from '@/types/auth';
+export default function UnauthorizedPage() { const { user } = useAuth(); const destination = user ? roleHome(user.role) : '/login'; return <main className="grid min-h-screen place-items-center px-4 text-center"><div><p className="text-sm font-bold text-brand-orange-600">Access denied</p><h1 className="mt-3 text-4xl font-bold">This area belongs to another role.</h1><p className="mt-4 text-stone-600">Your account does not have permission to open this page.</p><Link href={destination} className="mt-8 inline-flex rounded-xl bg-brand-orange-500 px-5 py-3 font-semibold text-white">Return to your portal</Link></div></main>; }

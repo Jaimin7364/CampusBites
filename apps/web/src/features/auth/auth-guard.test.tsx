@@ -18,7 +18,7 @@ describe('AuthGuard', () => {
   it('redirects a signed-in user away from another role portal', async () => {
     mocks.useAuth.mockReturnValue({ status: 'authenticated', user: { role: 'user' } });
     render(<AuthGuard role="admin"><p>Admin dashboard</p></AuthGuard>);
-    await waitFor(() => expect(mocks.replace).toHaveBeenCalledWith('/user'));
+    await waitFor(() => expect(mocks.replace).toHaveBeenCalledWith('/unauthorized?required=admin'));
     expect(screen.queryByText('Admin dashboard')).not.toBeInTheDocument();
   });
 });

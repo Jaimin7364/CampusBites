@@ -1,7 +1,7 @@
 import type { RequestHandler } from 'express';
 import { prisma } from '../config/prisma.js';
 import { AppError } from '../errors/app-error.js';
-import { verifyAccessToken } from '../utils/jwt.js';
+import { tokenPredatesPasswordChange, verifyAccessToken } from '../utils/jwt.js';
 
 export const authenticate: RequestHandler = async (request, _response, next) => {
   const authorization = request.header('authorization');
@@ -16,7 +16,7 @@ export const authenticate: RequestHandler = async (request, _response, next) => 
       where: { id: claims.sub },
       select: { id: true, role: true, active: true, passwordChangedAt: true },
     });
-    if (!user?.active || user.role !== claims.role) {
+    if (!user?.active || user.role !== claims.role || tokenPredatesPasswordChange(claims, user.passwordChangedAt)) {
       next(new AppError(401, 'INVALID_SESSION', 'The session is no longer valid'));
       return;
     }

@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { apiClient, authenticatedApiClient, setAccessToken } from '@/services/api-client';
+import { apiClient, authenticatedApiClient, SESSION_EXPIRED_EVENT, setAccessToken } from '@/services/api-client';
 import type { AuthResponse, AuthUser } from '@/types/auth';
 
 type AuthContextValue = {
@@ -52,6 +52,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       active = false;
     };
   }, [acceptSession]);
+
+  useEffect(() => { const expired = () => { setAccessToken(null); setUser(null); setStatus('unauthenticated'); }; window.addEventListener(SESSION_EXPIRED_EVENT, expired); return () => window.removeEventListener(SESSION_EXPIRED_EVENT, expired); }, []);
 
   const value = useMemo(
     () => ({ user, status, acceptSession, updateUser, logout }),

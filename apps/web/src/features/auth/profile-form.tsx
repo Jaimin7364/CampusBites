@@ -38,7 +38,7 @@ export function ProfileForm({ role }: { role: UserRole }) {
       {message && <Alert tone="success">{message}</Alert>}{error && <Alert>{error}</Alert>}
       {role === 'seller' ? <div className="grid gap-5 sm:grid-cols-2"><FormField label="Seller or business name" name="sellerName" defaultValue={user.sellerName ?? ''} required error={fields.sellerName} /><FormField label="Business owner name" name="businessOwnerName" defaultValue={user.businessOwnerName ?? ''} required error={fields.businessOwnerName} /></div> : <FormField label="Full name" name="fullName" defaultValue={user.fullName ?? ''} required error={fields.fullName} />}
       <div className="grid gap-5 sm:grid-cols-2"><FormField label="Email address" value={user.email} disabled readOnly /><FormField label="Mobile number" name="phone" defaultValue={user.phone} required error={fields.phone} /></div>
-      <FormField label="Profile photo URL" name="profilePhotoUrl" type="url" defaultValue={user.profilePhotoUrl ?? ''} placeholder="https://example.com/photo.jpg" error={fields.profilePhotoUrl} hint="Image uploads will use managed storage in a later module." />
+      <FormField label="Profile photo URL" name="profilePhotoUrl" type="url" defaultValue={user.profilePhotoUrl ?? ''} placeholder="https://example.com/photo.jpg" error={fields.profilePhotoUrl} hint="Use a secure HTTPS image URL." />
       <Button disabled={submitting}>{submitting ? 'Saving…' : 'Save profile'}</Button>
     </form>
   );

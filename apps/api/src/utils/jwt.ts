@@ -10,7 +10,7 @@ type BaseClaims = {
   tokenType: 'access' | 'refresh';
 };
 
-export type AccessClaims = BaseClaims & { tokenType: 'access' };
+export type AccessClaims = BaseClaims & { tokenType: 'access'; iat?: number };
 export type RefreshClaims = BaseClaims & {
   tokenType: 'refresh';
   jti: string;
@@ -73,4 +73,10 @@ export function verifyAccessToken(token: string) {
 
 export function verifyRefreshToken(token: string) {
   return verify<RefreshClaims>(token, env.JWT_REFRESH_SECRET, 'refresh');
+}
+
+export function tokenPredatesPasswordChange(claims: { iat?: number }, passwordChangedAt: Date | null) {
+  if (!passwordChangedAt) return false;
+  if (typeof claims.iat !== 'number') return true;
+  return claims.iat * 1000 + 999 < passwordChangedAt.getTime();
 }

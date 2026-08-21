@@ -1,0 +1,7 @@
+'use client';
+import { useEffect, useState } from 'react'; import { SESSION_EXPIRED_EVENT } from '@/services/api-client';
+export function AppStatus() {
+  const [online, setOnline] = useState(true); const [expired, setExpired] = useState(false);
+  useEffect(() => { const sync = () => setOnline(navigator.onLine); const sessionExpired = () => setExpired(true); sync(); window.addEventListener('online', sync); window.addEventListener('offline', sync); window.addEventListener(SESSION_EXPIRED_EVENT, sessionExpired); return () => { window.removeEventListener('online', sync); window.removeEventListener('offline', sync); window.removeEventListener(SESSION_EXPIRED_EVENT, sessionExpired); }; }, []);
+  return <div aria-live="polite" aria-atomic="true">{!online ? <div role="status" className="fixed inset-x-0 top-0 z-50 bg-amber-500 px-4 py-2 text-center text-sm font-semibold text-stone-950">You are offline. Saved pages remain visible, but actions need a connection.</div> : null}{expired ? <div role="alert" className="fixed bottom-4 left-1/2 z-50 flex w-[min(92vw,34rem)] -translate-x-1/2 items-center justify-between gap-4 rounded-2xl bg-stone-950 px-5 py-4 text-sm text-white shadow-xl"><span>Your session expired. Please sign in again.</span><button type="button" onClick={() => setExpired(false)} className="rounded-lg px-2 py-1 font-semibold text-orange-300">Dismiss</button></div> : null}</div>;
+}

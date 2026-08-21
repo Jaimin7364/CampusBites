@@ -4,6 +4,7 @@ import { AppError } from '../src/errors/app-error.js';
 import {
   signAccessToken,
   signRefreshToken,
+  tokenPredatesPasswordChange,
   verifyAccessToken,
   verifyRefreshToken,
 } from '../src/utils/jwt.js';
@@ -32,5 +33,12 @@ describe('JWT utilities', () => {
   it('does not accept a refresh token as an access token', () => {
     const token = signRefreshToken('user-1', UserRole.USER, 'family-1', 7).token;
     expect(() => verifyAccessToken(token)).toThrow(AppError);
+  });
+
+  it('invalidates access tokens issued before a password change', () => {
+    expect(tokenPredatesPasswordChange({ iat: 1_000 }, new Date(1_002_000))).toBe(true);
+    expect(tokenPredatesPasswordChange({ iat: 1_000 }, new Date(1_000_500))).toBe(false);
+    expect(tokenPredatesPasswordChange({}, new Date())).toBe(true);
+    expect(tokenPredatesPasswordChange({ iat: 1_000 }, null)).toBe(false);
   });
 });

@@ -32,7 +32,7 @@ CampusBites is a campus-focused food ordering and pre-ordering platform for stud
    npm run dev
    ```
 
-The web app runs at `http://localhost:3000` and the API at `http://localhost:4000`. Service health is available at `/api/health`; database health is at `/api/health/database`.
+The web app runs at `http://localhost:3000` and the API at `http://localhost:4000`. Service liveness is available at `/api/health`; deployment readiness is at `/api/health/ready`.
 
 ## Quality Commands
 
@@ -53,6 +53,10 @@ npm run format:check
 - `CampusBites Module-Wise Build Plan.md`: vertical implementation plan and progress
 
 Domain tables and migrations are added by the module that owns them. Module 0 intentionally verifies Prisma connectivity without introducing premature domain models.
+
+## Production operations
+
+See [`docs/PRODUCTION_RUNBOOK.md`](docs/PRODUCTION_RUNBOOK.md) for deployment, migrations, environment variables, backup/restore, rollback, cleanup, health checks, and graceful restart. The route inventory is in [`docs/API_REFERENCE.md`](docs/API_REFERENCE.md), and the backend security review is in [`docs/MODULE_11_BACKEND_SECURITY_AUDIT.md`](docs/MODULE_11_BACKEND_SECURITY_AUDIT.md).
 
 ## Module 1 Backend
 

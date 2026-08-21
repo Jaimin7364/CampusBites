@@ -1,0 +1,2 @@
+'use client';
+export default function GlobalError({ reset }: { error: Error & { digest?: string }; reset: () => void }) { return <html lang="en"><body><main style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: 24, textAlign: 'center', fontFamily: 'system-ui' }}><div><h1>CampusBites needs to reload</h1><p>We hit an unexpected application error.</p><button type="button" onClick={reset} style={{ marginTop: 16, padding: '12px 18px' }}>Reload CampusBites</button></div></main></body></html>; }
